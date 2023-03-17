@@ -8,7 +8,11 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <sys/wait.h>
+#include "connection.h"
 #include "include/varint.h"
+#include "packet/types.h"
+#include "packet/reader.h"
 
 #ifndef PORT
 #define PORT "25565"
@@ -42,25 +46,6 @@ void *get_in_addr(struct sockaddr *addr) {
     }
 
     return &(((struct sockaddr_in6*) addr)->sin6_addr);
-}
-/* }}}1 */
-
-/* read_handle_packet(int, char*, int): void {{{1 */
-void read_handle_packet(int remote_fd, char *buf, int buf_len) {
-    unsigned char bytes_processed = 0;
-    char *buf_ptr = buf;
-
-    int length = varint_decode(buf_ptr, buf_len, &bytes_processed);
-    printf("got packet length: %d\n", length);
-    buf_ptr += bytes_processed;
-
-    int packet_id = varint_decode(buf_ptr, buf_len - (buf_ptr - buf), &bytes_processed);
-    printf("got packet id: %d\n", packet_id);
-    buf_ptr += bytes_processed;
-
-    int proto_version = varint_decode(buf_ptr, buf_len - (buf_ptr - buf), &bytes_processed);
-    printf("got proto version: %d\n", proto_version);
-    buf_ptr += bytes_processed;
 }
 /* }}}1 */
 
@@ -143,21 +128,15 @@ int main(int argc, char **argv) {
 
         printf("reactor: got connection from %s\n", s);
 
-        if (!fork()) {
+        int fork_status;
+        if ((fork_status = fork()) == -1) {
+            perror("reactor: fork");
+            exit(1);
+        }
+
+        if (fork_status == 0) {
             close(sock_fd);
-
-            int bytes_read;
-            char buf[2048];
-
-            if ((bytes_read = recv(remote_fd, buf, 2048 - 1, 0)) == -1) {
-                perror("recv");
-                exit(EXIT_FAILURE);
-            }
-
-            read_handle_packet(remote_fd, buf, bytes_read);
-
-            close(remote_fd);
-            exit(0);
+            handle_connection(create_connection(remote_fd));
         } else {
             close(remote_fd);
         }
