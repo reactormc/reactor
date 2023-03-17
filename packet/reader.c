@@ -5,6 +5,7 @@
 #include "../util/byte_utils.h"
 #include "../util/logger.h"
 
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,8 +26,10 @@ VarInt varint_decode_offset(char *buffer, int length, int *offset) {
 uint16_t _read_uint16(char* bytes, int *offset) {
     uint8_to_uint16 converter;
 
-    converter.chars[0] = *(bytes + ++(*offset));
-    converter.chars[1] = *(bytes + ++(*offset));
+    converter.chars[0] = *(bytes + *offset + 1);
+    converter.chars[1] = *(bytes + *offset);
+    
+    *offset += 2;
 
     return converter.short_value;
 }
@@ -54,8 +57,6 @@ int read_packet(char *buffer, int length, int *offset, int compressed, ReactorPa
 
     int packet_length = varint_decode_offset(buffer, length, offset); 
 
-    *offset += varint_encoding_length(packet_length);
-
     if (packet_length > remaining_length) {
         debug("Cannot read entire packet\n");
         return -2;
@@ -80,6 +81,7 @@ int read_packet(char *buffer, int length, int *offset, int compressed, ReactorPa
 
     strncpy(data_buf, buffer + *offset, packet_length);
     (*packet)->data = data_buf;
+    *offset += packet_length;
 
     return 0;
 }

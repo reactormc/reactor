@@ -1,8 +1,13 @@
 CC = gcc
+
 CFLAGS = -Wall -pedantic -std=gnu17 -g
+CFLAGS += $(shell pkg-config --cflags json-c)
+
 SRC := $(shell find . -type f -regex ".*\.c")
+
 LIB := $(shell find . -type f -regex ".*\.a")
-LIB += -lunistring
+LIB += $(shell pkg-config --libs json-c)
+LIB += -lunistring 
 
 OUT_NAME = reactor
 
