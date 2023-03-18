@@ -17,7 +17,9 @@ typedef struct connection {
 } Connection;
 
 ConnectionPtr create_connection(int remote_fd);
+
 void handle_connection(ConnectionPtr conn);
+
 void handle_packet(ConnectionPtr conn, ReactorPacketPtr packet, int *read_buffer_offset);
 
 #endif

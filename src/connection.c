@@ -22,8 +22,8 @@ static char read_buffer[PACKET_BUFFER_SIZE] = {0};
 void _read_network(ConnectionPtr conn, int buffer_offset) {
     int bytes_read = 0;
 
-    if ((bytes_read = recv(conn->remote_fd, read_buffer + buffer_offset, PACKET_BUFFER_SIZE - buffer_offset, 0)) 
-            == -1) {
+    if ((bytes_read = recv(conn->remote_fd, read_buffer + buffer_offset, PACKET_BUFFER_SIZE - buffer_offset, 0))
+        == -1) {
 
         perror("reactor: recv");
         exit(EXIT_FAILURE);
@@ -66,18 +66,18 @@ void handle_connection(ConnectionPtr conn) {
 
     ReactorPacketPtr packet = NULL;
     int next_read_offset = 0;
-    
+
     while (1) {
         if (read_buffer_offset >= 0) {
             int status;
             while (1) {
-                if (read_buffer_offset + 1 >= read_buffer_size) {            
+                if (read_buffer_offset + 1 >= read_buffer_size) {
                     debug("handle_connection: waiting for more data\n");
                     _read_network(conn, read_buffer_offset);
                 } else {
                     debug("handle_connection: reading packet(s) from buffer\n");
-                    if ((status = read_packet(read_buffer, PACKET_BUFFER_SIZE, &read_buffer_offset, 
-                                    0, &packet)) == 0) {
+                    if ((status = read_packet(read_buffer, PACKET_BUFFER_SIZE, &read_buffer_offset,
+                                              0, &packet)) == 0) {
 
                         debug("handle_connection: got a packet, handling\n");
                         handle_packet(conn, packet, &read_buffer_offset);
@@ -132,7 +132,7 @@ void _handle_handshaking(ConnectionPtr conn, ReactorPacketPtr packet, int *read_
 
     if (handshake->next_state == STATE_STATUS) {
         debug("reactor: switching to status state\n");
-        conn->state = STATE_STATUS; 
+        conn->state = STATE_STATUS;
 
         debug("reactor: creating json status response\n");
         /* json response building {{{2 */
@@ -162,26 +162,28 @@ void _handle_handshaking(ConnectionPtr conn, ReactorPacketPtr packet, int *read_
 
         /* description */
         struct json_object *description = json_object_new_object();
-        json_object_object_add(description, "text", json_object_new_string("Welcome to the most 420/69 server in existence.\n"));
-        /* end description */        
+        json_object_object_add(description, "text",
+                               json_object_new_string("Welcome to the most 420/69 server in existence.\n"));
+        /* end description */
 
         /* favicon */
         /* do not ask */
-        struct json_object *favicon = json_object_new_string("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAEwElEQVR4nO2ZYWwTZRjHn3Y4IQu6rcPeLcjsSsWx6cIGYoagRjAQxKkRERngN5e7dzV8wC8aQ2JEP/lBg8bERBP95AcS27lkRKMiG93o2OrGXVfB0bXbOmFsMtzo0D7mvdHm1vZa1pp4d7tf8mb9sCb3+z/PPe97VwADAwMDAwPdsubnyzZLj1gOSwpEs70reKy2d3R8TWcwCicFCywF1g9goaM79PnG/sjNrYNXsOJsEMElfgdLgUrP8Jv1/ZEZKk6XzRNEcIsIrcJu0DMPeIKNtb6xK3HxROWpvFscAEQT6BFr+1iR41zo+8f9fyTEF1ReWsIh0CO2rvDeul/HEu2uIO+Db7AA9ERF71BxlTf8U3LVU+VFBJfwDOgJW2dwT3y6Jy/ZPR+vfhvoCUd36NMGMbXqaSvvFqPw7YVq0EvLr/eO9KUTV5Cnrf8O6AHbL5d2yPf1O5KXBt9AIWgde9fwhw3CeExJPvWep5UXb4FLqANNg2he5w23KYkrV16q/rugZdZ6AvfUnA//nqO8D9oCd4NWuf9M0L7BNzaZm7w4Da2DVaBVKjsuP72pPxLNUR6h1d8EWqWyK9j8mDD+T87yLuET0Cpru4MfbRGVxbPKS1ve8ArQIuu8oVOZxKWtrjNj5aegLWAHtUAYfJu34rNZ/xHRXOUNd2eTz9L2MWgVXgS1wLN4jLCIPINRjsXGTK+rqs+P+POSnz/wvAVqkye3l1IIdI9/pG90JK+2n5f/EtTU9kQmLwvhpvx2oPK1vSOR/6Dyp1V12OEY3EkYnFUIQeoE1usvq+0bvZq/vHARXP4yUBtchhBet87NNThDM3nLu8Wr4L7gALXCpQmhmfkb6+7yYaWpA7e1hPKRj4JbfBLUDpcUQuO9EbTBGWnREDa/8FsOA0+IgUt8FbQClxTCrpWhRAh0bdoTWEzl6dA7ClqDk4VwsGwa7abOlBDuTF54D7QKx+DOg5brcw+aPQvk46tmQxZ5t/CFpn/NcbJY/1LJxKzd1JE2ACmEer9S25/U9I8ZnBU3Exan6C3wcukEZgqhemNKAG5Nv9B0slhPGLwm3w73lV5LmQOJ3QE60NYUiMufgh+HloOe5IlCCHaQfTZ1omP/xSFo7ysCPcqTpBAcprPYVHY9sUXWFfqw2Xorypfjc6BXeXJ77S2ZmD1g+XNOfliiJ8b4s4PmQnAuQp4ORjogsz1AaSYEZw7y8e9qPgRnHvKaDeGoBVe2MPjEvpLJ44ctN6bzkY9DX5rQlydpvhfjGWwGNXBkNZYSFj+jF0qnN53i0iGm4Bw2Fo/nLJ+hE2KERQJqgFuFDGFwkF6YXF6+niq6lLN8mhDUI0/hWfxBuifZGNYs61E80j6/sBOmiBUfhUVCrLhbNW1PISxulVf1tVUz+JC5K/2ZvsCbU+VVDWHwg+TWzhTCobIbf+lGnsKz+FW64ZYuBDobXimZfB/0BM/iCaUJT0OoKuhOyNMByTG4DfREC4sHMu3xNISHl/VI8nSLpOcE0BOHK3A5YXA4Uwh0d5j/iydAj5By3E5YTDy9KRxb/W9UYDHoFVKO23kGQwry7c770Ap658hqXEFY3M8z+DHP4NeEweOExS3/93UZGBgYGED+/AuD903B4vUcMQAAAABJRU5ErkJggg==");
-        /* end favicon */ 
+        struct json_object *favicon = json_object_new_string(
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAEwElEQVR4nO2ZYWwTZRjHn3Y4IQu6rcPeLcjsSsWx6cIGYoagRjAQxKkRERngN5e7dzV8wC8aQ2JEP/lBg8bERBP95AcS27lkRKMiG93o2OrGXVfB0bXbOmFsMtzo0D7mvdHm1vZa1pp4d7tf8mb9sCb3+z/PPe97VwADAwMDAwPdsubnyzZLj1gOSwpEs70reKy2d3R8TWcwCicFCywF1g9goaM79PnG/sjNrYNXsOJsEMElfgdLgUrP8Jv1/ZEZKk6XzRNEcIsIrcJu0DMPeIKNtb6xK3HxROWpvFscAEQT6BFr+1iR41zo+8f9fyTEF1ReWsIh0CO2rvDeul/HEu2uIO+Db7AA9ERF71BxlTf8U3LVU+VFBJfwDOgJW2dwT3y6Jy/ZPR+vfhvoCUd36NMGMbXqaSvvFqPw7YVq0EvLr/eO9KUTV5Cnrf8O6AHbL5d2yPf1O5KXBt9AIWgde9fwhw3CeExJPvWep5UXb4FLqANNg2he5w23KYkrV16q/rugZdZ6AvfUnA//nqO8D9oCd4NWuf9M0L7BNzaZm7w4Da2DVaBVKjsuP72pPxLNUR6h1d8EWqWyK9j8mDD+T87yLuET0Cpru4MfbRGVxbPKS1ve8ArQIuu8oVOZxKWtrjNj5aegLWAHtUAYfJu34rNZ/xHRXOUNd2eTz9L2MWgVXgS1wLN4jLCIPINRjsXGTK+rqs+P+POSnz/wvAVqkye3l1IIdI9/pG90JK+2n5f/EtTU9kQmLwvhpvx2oPK1vSOR/6Dyp1V12OEY3EkYnFUIQeoE1usvq+0bvZq/vHARXP4yUBtchhBet87NNThDM3nLu8Wr4L7gALXCpQmhmfkb6+7yYaWpA7e1hPKRj4JbfBLUDpcUQuO9EbTBGWnREDa/8FsOA0+IgUt8FbQClxTCrpWhRAh0bdoTWEzl6dA7ClqDk4VwsGwa7abOlBDuTF54D7QKx+DOg5brcw+aPQvk46tmQxZ5t/CFpn/NcbJY/1LJxKzd1JE2ACmEer9S25/U9I8ZnBU3Exan6C3wcukEZgqhemNKAG5Nv9B0slhPGLwm3w73lV5LmQOJ3QE60NYUiMufgh+HloOe5IlCCHaQfTZ1omP/xSFo7ysCPcqTpBAcprPYVHY9sUXWFfqw2Xorypfjc6BXeXJ77S2ZmD1g+XNOfliiJ8b4s4PmQnAuQp4ORjogsz1AaSYEZw7y8e9qPgRnHvKaDeGoBVe2MPjEvpLJ44ctN6bzkY9DX5rQlydpvhfjGWwGNXBkNZYSFj+jF0qnN53i0iGm4Bw2Fo/nLJ+hE2KERQJqgFuFDGFwkF6YXF6+niq6lLN8mhDUI0/hWfxBuifZGNYs61E80j6/sBOmiBUfhUVCrLhbNW1PISxulVf1tVUz+JC5K/2ZvsCbU+VVDWHwg+TWzhTCobIbf+lGnsKz+FW64ZYuBDobXimZfB/0BM/iCaUJT0OoKuhOyNMByTG4DfREC4sHMu3xNISHl/VI8nSLpOcE0BOHK3A5YXA4Uwh0d5j/iydAj5By3E5YTDy9KRxb/W9UYDHoFVKO23kGQwry7c770Ap658hqXEFY3M8z+DHP4NeEweOExS3/93UZGBgYGED+/AuD903B4vUcMQAAAABJRU5ErkJggg==");
+        /* end favicon */
 
         /* enforcesSecureChat */
         struct json_object *enforcesSecureChat = json_object_new_boolean(0);
         /* end enforcesSecureChat */
 
-        /* final message */ 
+        /* final message */
         struct json_object *response = json_object_new_object();
         json_object_object_add(response, "version", version);
         json_object_object_add(response, "players", players);
         json_object_object_add(response, "description", description);
         json_object_object_add(response, "favicon", favicon);
         json_object_object_add(response, "enforcesSecureChat", enforcesSecureChat);
-        /* end final message */ 
+        /* end final message */
         /* }}}2 */
 
         const char *data = json_object_to_json_string(response);
@@ -192,7 +194,7 @@ void _handle_handshaking(ConnectionPtr conn, ReactorPacketPtr packet, int *read_
 
         debug("reactor: building response packet\n");
         PacketStatusOutStatusResponse resp;
-        resp.response = (uint8_t*) out;
+        resp.response = (uint8_t *) out;
 
         ReactorPacketPtr packet_out = create_empty_packet(PACKET_STATUS_OUT_STATUS_RESPONSE);
         if (!packet_out) {
@@ -251,7 +253,7 @@ void _handle_play(ConnectionPtr conn, ReactorPacketPtr packet, int *read_buffer_
 
 /* handle_packet(int, ReactorPacketPtr*, int*): void {{{1 */
 void handle_packet(ConnectionPtr conn, ReactorPacketPtr packet, int *read_buffer_offset) {
-    switch(conn->state) {
+    switch (conn->state) {
         case STATE_HANDSHAKING:
             _handle_handshaking(conn, packet, read_buffer_offset);
             break;

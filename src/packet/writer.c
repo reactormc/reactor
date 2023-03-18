@@ -1,6 +1,6 @@
 #include "writer.h"
 #include "types.h"
-#include "../include/varint.h"
+#include "include/varint.h"
 #include <stdio.h>
 #include <unistr.h>
 
@@ -21,7 +21,7 @@ void pack_packet_status_out_status_response(ReactorPacketPtr packet, PacketStatu
     int length = u8_strlen(resp->response);
 
     packet->packet_length += length;
-    packet->data = (char*) resp->response;
+    packet->data = (char *) resp->response;
 }
 
 char *encode_packet(ReactorPacketPtr packet) {
@@ -32,13 +32,13 @@ char *encode_packet(ReactorPacketPtr packet) {
         perror("encode_packet - calloc");
         return NULL;
     }
-    
+
     unsigned char bytes_tmp = 0;
     int bytes_written = 0;
 
     varint_encode(packet->packet_length, buffer, buffer_len, &bytes_tmp);
     bytes_written += bytes_tmp;
-    
+
     varint_encode(packet->packet_id, buffer + bytes_written, buffer_len - bytes_written, &bytes_tmp);
     bytes_written += bytes_tmp;
 

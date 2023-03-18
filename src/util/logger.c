@@ -5,7 +5,7 @@
 #include "logger.h"
 
 /* debug(char*, ...) {{{1 */
-int debug(char* msg, ...) {
+int debug(char *msg, ...) {
 #ifdef DEBUG
     int ret = 0;
     va_list argp;
@@ -21,7 +21,7 @@ int debug(char* msg, ...) {
 /* }}}1 */
 
 /* debug_no_prefix(char*, ...) {{{1 */
-int debug_no_prefix(char* msg, ...) {
+int debug_no_prefix(char *msg, ...) {
 #ifdef DEBUG
     int ret = 0;
     va_list argp;

@@ -5,14 +5,10 @@
 #include <errno.h>
 #include <unistd.h>
 #include <signal.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include "connection.h"
-#include "include/varint.h"
-#include "packet/types.h"
-#include "packet/reader.h"
 
 #ifndef PORT
 #define PORT "25565"
@@ -42,10 +38,10 @@ void create_server_hints(struct addrinfo *hints) {
 /* get_in_addr(struct sockaddr*): void* {{{1 */
 void *get_in_addr(struct sockaddr *addr) {
     if (addr->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*) addr)->sin_addr);
+        return &(((struct sockaddr_in *) addr)->sin_addr);
     }
 
-    return &(((struct sockaddr_in6*) addr)->sin6_addr);
+    return &(((struct sockaddr_in6 *) addr)->sin6_addr);
 }
 /* }}}1 */
 
@@ -64,15 +60,15 @@ int main(int argc, char **argv) {
     int sock_fd, yes = 1;
     struct addrinfo *result;
     for (result = server_info; result; result = result->ai_next) {
-        if ((sock_fd = socket(result->ai_family, result->ai_socktype, 
-                        result->ai_protocol)) == -1) {
+        if ((sock_fd = socket(result->ai_family, result->ai_socktype,
+                              result->ai_protocol)) == -1) {
 
             perror("socket");
             continue;
         }
 
-        if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &yes, 
-                    sizeof(int)) == -1) {
+        if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &yes,
+                       sizeof(int)) == -1) {
 
             perror("setsockopt");
             exit(1);
@@ -114,8 +110,8 @@ int main(int argc, char **argv) {
         struct sockaddr_storage their_addr;
         socklen_t sin_size = sizeof(their_addr);
 
-        int remote_fd = accept(sock_fd, (struct sockaddr *) &their_addr, 
-                &sin_size);
+        int remote_fd = accept(sock_fd, (struct sockaddr *) &their_addr,
+                               &sin_size);
 
         if (remote_fd == -1) {
             perror("accept");
@@ -123,8 +119,8 @@ int main(int argc, char **argv) {
         }
 
         char s[INET6_ADDRSTRLEN];
-        inet_ntop(their_addr.ss_family, 
-                get_in_addr((struct sockaddr*) &their_addr), s, sizeof(s));
+        inet_ntop(their_addr.ss_family,
+                  get_in_addr((struct sockaddr *) &their_addr), s, sizeof(s));
 
         printf("reactor: got connection from %s\n", s);
 

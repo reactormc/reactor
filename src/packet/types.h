@@ -10,8 +10,8 @@ typedef struct reactor_packet {
      * Uncompressed: Length of packet_id + data
      * Compressed: Length of compressed packet_id + data
      */
-    VarInt packet_length; 
-                          
+    VarInt packet_length;
+
     /**
      * Uncompressed: Unused, set to -1.
      * Compressed: Length of uncompressed packet_id + data or 0
@@ -33,12 +33,6 @@ typedef struct reactor_packet {
 /* }}}1 */
 
 /* Handshaking State {{{1 */
-typedef struct packet_handshaking_in_handshake {
-    VarInt protocol_version;
-    UnicodeString server_address;
-    uint16_t server_port;
-    VarInt next_state;
-} PacketHandshakingInHandshake;
 /* }}}1 */
 
 /* Status State {{{1*/
@@ -48,7 +42,7 @@ typedef struct packet_status_out_status_response {
 } PacketStatusOutStatusResponse;
 
 typedef struct packet_status_out_ping_response {
-   long payload; 
+    long payload;
 } PacketStatusOutPingResponse;
 /* }}}2 */
 /* Serverbound {{{2 */

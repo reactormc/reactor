@@ -1,6 +1,5 @@
 #include "unicode_string.h"
-#include "../include/varint.h"
-#include <netinet/in.h>
+#include "include/varint.h"
 #include <stdlib.h>
 #include <string.h>
 #include <unistr.h>
@@ -62,7 +61,7 @@ UnicodeString read_unicode_string(char *bytes, int length, int *offset) {
 /* }}}1 */
 
 /* encode_to_unicode_string(const char*, int): char* {{{1 */
-char* encode_to_unicode_string(const char *string, int max_length) {
+char *encode_to_unicode_string(const char *string, int max_length) {
     int length = strlen(string);
     if (length > max_length) {
         return NULL;
@@ -89,7 +88,7 @@ char* encode_to_unicode_string(const char *string, int max_length) {
 
         *(buffer + off) = *(string + i);
     }
-    
+
     return buffer;
 }
 /* }}}1 */

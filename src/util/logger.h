@@ -7,7 +7,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-int debug(char*, ...);
-int debug_no_prefix(char*, ...);
+int debug(char *, ...);
+
+int debug_no_prefix(char *, ...);
 
 #endif
