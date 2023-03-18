@@ -1,0 +1,6 @@
+#ifndef PACKET_LOGIN_OUT_DISCONNECT_H
+#define PACKET_LOGIN_OUT_DISCONNECT_H 1
+
+
+
+#endif
