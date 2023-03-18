@@ -1,7 +1,7 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H 1
 
-#include "./packet/types.h"
+#include "packet/packet.h"
 
 #define PACKET_BUFFER_SIZE 4096
 
@@ -16,10 +16,8 @@ typedef struct connection {
     int state;
 } Connection;
 
-ConnectionPtr create_connection(int remote_fd);
+void handle_connection(int remote_fd);
 
-void handle_connection(ConnectionPtr conn);
 
-void handle_packet(ConnectionPtr conn, ReactorPacketPtr packet, int *read_buffer_offset);
 
 #endif

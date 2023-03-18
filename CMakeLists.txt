@@ -18,10 +18,10 @@ if (NOT JSONC_LIB)
 endif()
 
 # All sources
-file(GLOB_RECURSE SOURCES include/*.h src/*.c src/*.h)
+file(GLOB_RECURSE SOURCES src/*.c src/*.h)
 
 # Set libraries
-set(REACTOR_LIBS ${UNISTRING_LIB} ${JSONC_LIB} ${PROJECT_SOURCE_DIR}/lib/varint.a)
+set(REACTOR_LIBS ${UNISTRING_LIB} ${JSONC_LIB})
 
 # Root folder should be in include path
 include_directories(. ./src)

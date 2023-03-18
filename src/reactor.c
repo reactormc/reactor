@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
 
         if (fork_status == 0) {
             close(sock_fd);
-            handle_connection(create_connection(remote_fd));
+            handle_connection(remote_fd);
         } else {
             close(remote_fd);
         }

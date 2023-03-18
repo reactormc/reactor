@@ -1,11 +1,10 @@
 #include "unicode_string.h"
-#include "include/varint.h"
+#include "util/varint.h"
 #include <stdlib.h>
 #include <string.h>
-#include <unistr.h>
 
-/* _grow(void*, int*): int {{{1 */
-int _grow(void *buffer, int *size) {
+/* grow(void*, int*): int {{{1 */
+int grow(void *buffer, int *size) {
     *size += UNICODE_STRING_SIZE_INCR;
 
     void *tmp = realloc(buffer, *size);
@@ -46,7 +45,7 @@ UnicodeString read_unicode_string(char *bytes, int length, int *offset) {
 
         buffer_size++;
         if (buffer_size + 1 > buffer_len) {
-            if (_grow(buffer, &buffer_len) != 0) {
+            if (grow(buffer, &buffer_len) != 0) {
                 free(buffer);
                 return NULL;
             }
