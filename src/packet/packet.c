@@ -22,12 +22,12 @@ ReactorPacketPtr create_empty_packet(int packet_id) {
 int create_packet_from_header(char *buffer, int length, int *offset, int compressed, ReactorPacketPtr *packet) {
     *packet = calloc(1, sizeof(ReactorPacket));
     if (!*packet) {
-        perror("read_packet: calloc");
+        perror("create_packet_from_header: packet calloc");
         return -1;
     }
 
     if (*offset < 0 || *offset >= length) {
-        debug("Offset out of bounds\n");
+        debug("create_packet_from_header: offset out of bounds\n");
         free(packet);
         return -2;
     }
@@ -42,9 +42,11 @@ int create_packet_from_header(char *buffer, int length, int *offset, int compres
 
     int packet_length = varint_decode_offset(buffer, length, offset);
 
-    if (packet_length > remaining_length) {
-        debug("Cannot read entire packet\n");
-        free(packet);
+    if (packet_length == 0) {
+        debug("create_packet_from_header: done reading packets in buffer\n");
+        return 1;
+    } else if (packet_length > remaining_length) {
+        debug("create_packet_from_header: cannot read entire packet\n");
         return -2;
     }
 
@@ -61,8 +63,7 @@ int create_packet_from_header(char *buffer, int length, int *offset, int compres
 
     char *data_buf = calloc(packet_length, sizeof(char));
     if (!data_buf) {
-        perror("read_packet: calloc");
-        free(packet);
+        perror("create_packet_from_header: data_buf calloc");
         return -1;
     }
 

@@ -3,6 +3,8 @@
 #include <sys/socket.h>
 
 void handle_packet(ConnectionPtr conn, ReactorPacketPtr packet, int *read_buffer_offset) {
+    debug("handle_packet: state: %d, packet id: %llu\n", conn->state, packet->packet_id);
+
     switch (conn->state) {
         case STATE_HANDSHAKING:
             handle_handshaking(conn, packet, read_buffer_offset);
@@ -27,7 +29,7 @@ int send_packet(ConnectionPtr conn, ReactorPacketPtr packet) {
 
     int total_size = (int) packet->packet_length + varint_encoding_length(packet->packet_length);
 
-    debug("reactor: sending packet, size %d\n", total_size);
+    debug("send_packet: sending packet, size %d\n", total_size);
 
     ssize_t total_bytes_sent = 0;
 
@@ -46,7 +48,7 @@ int send_packet(ConnectionPtr conn, ReactorPacketPtr packet) {
         }
     }
 
-    debug("reactor: sent %d byte packet\n", total_bytes_sent);
+    debug("send_packet: sent %d byte packet\n", total_bytes_sent);
     free_packet(packet);
     return 0;
 }

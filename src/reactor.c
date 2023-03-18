@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include "connection.h"
+#include "util/logger.h"
 
 #ifndef PORT
 #define PORT "25565"
@@ -47,6 +48,8 @@ void *get_in_addr(struct sockaddr *addr) {
 
 /* main(int, char**): int {{{1 */
 int main(int argc, char **argv) {
+    debug("reactor: starting up\n");
+
     struct addrinfo hints;
     create_server_hints(&hints);
 

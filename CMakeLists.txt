@@ -24,14 +24,13 @@ file(GLOB_RECURSE SOURCES src/*.c src/*.h)
 set(REACTOR_LIBS ${UNISTRING_LIB} ${JSONC_LIB})
 
 # Root folder should be in include path
-include_directories(. ./src)
+include_directories(./src)
 
-# Check debug
-if (DEBUG)
-    add_executable(reactor_debug ${SOURCES})
-    target_compile_definitions(reactor_debug PRIVATE DEBUG)
-    target_link_libraries(reactor_debug ${REACTOR_LIBS})
-else()
-    add_executable(reactor ${SOURCES})
-    target_link_libraries(reactor ${REACTOR_LIBS})
-endif()
+# Release build
+add_executable(reactor ${SOURCES})
+target_link_libraries(reactor ${REACTOR_LIBS})
+
+# Debug build
+add_executable(reactor_debug ${SOURCES})
+target_compile_definitions(reactor_debug PUBLIC DEBUG)
+target_link_libraries(reactor_debug ${REACTOR_LIBS})
