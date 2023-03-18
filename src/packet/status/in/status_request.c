@@ -1,9 +1,7 @@
-#include "handler.h"
-#include "util/logger.h"
-#include "util/unicode_string.h"
+#include "status_request.h"
 #include "packet/status/out/status_response.h"
+#include "util/logger.h"
 
-#include <stdio.h>
 #include <json-c/json.h>
 
 void handle_status_request(ConnectionPtr conn, ReactorPacketPtr packet, int *read_buffer_offset) {
@@ -66,8 +64,4 @@ void handle_status_request(ConnectionPtr conn, ReactorPacketPtr packet, int *rea
     json_object_put(response);
 
     send_status_response(conn, create_status_response((uint8_t*) out));
-}
-
-void handle_ping_request(ConnectionPtr conn, ReactorPacketPtr packet, int *read_buffer_offset) {
-
 }

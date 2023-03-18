@@ -2,6 +2,7 @@
 #define CONNECTION_H 1
 
 #include "packet/packet.h"
+#include <stdint.h>
 
 #define PACKET_BUFFER_SIZE 4096
 
@@ -14,10 +15,9 @@ typedef struct connection *ConnectionPtr;
 typedef struct connection {
     int remote_fd;
     int state;
+    uint64_t ping_request_payload;
 } Connection;
 
 void handle_connection(int remote_fd);
-
-
 
 #endif

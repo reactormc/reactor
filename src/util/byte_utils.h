@@ -19,5 +19,7 @@ typedef union uint8_to_uint64 {
 } uint8_to_uint64;
 
 uint16_t read_uint16(char *bytes, int *offset);
+uint32_t read_uint32(char *bytes, int *offset);
+uint64_t read_uint64(char *bytes, int *offset);
 
 #endif
