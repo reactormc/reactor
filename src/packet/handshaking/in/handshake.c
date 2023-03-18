@@ -12,7 +12,7 @@ PacketHandshakingInHandshake *read_handshake(ReactorPacketPtr parent, int *buffe
     int offset = 0;
 
     child->protocol_version = varint_decode_offset(parent->data, parent->packet_length, &offset);
-    child->server_address = read_unicode_string(parent->data, parent->packet_length - offset, &offset);
+    child->server_address = read_lpus_from_bytes(parent->data, parent->packet_length - offset, &offset);
     child->server_port = read_uint16(parent->data, &offset);
     child->next_state = varint_decode_offset(parent->data, parent->packet_length - offset, &offset);
 

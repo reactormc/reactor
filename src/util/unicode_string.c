@@ -2,6 +2,8 @@
 #include "util/varint.h"
 #include <stdlib.h>
 #include <string.h>
+#include <unistr.h>
+#include <unitypes.h>
 
 /* grow(void*, int*): int {{{1 */
 int grow(void *buffer, int *size) {
@@ -17,11 +19,11 @@ int grow(void *buffer, int *size) {
 }
 /* }}}1 */
 
-/* read_unicode_string(char*, int, int): UnicodeString {{{1 */
-UnicodeString read_unicode_string(char *bytes, int length, int *offset) {
+/* read_lpus_from_bytes(char*, int, int): UnicodeString {{{1 */
+UnicodeString read_lpus_from_bytes(char *bytes, int length, int *offset) {
     int buffer_size = 0, buffer_len = INITIAL_UNICODE_STRING_SIZE;
 
-    UnicodeString buffer = calloc(buffer_len, sizeof(uint8_t));
+    UnicodeString buffer = calloc(buffer_len, sizeof(UnicodeCharacter));
     if (!buffer) {
         return NULL;
     }
@@ -41,7 +43,7 @@ UnicodeString read_unicode_string(char *bytes, int length, int *offset) {
 
     int i;
     for (i = 0; i < str_len; i++, (*offset)++) {
-        uint8_t codepoint = (uint8_t) *(bytes + *offset);
+        UnicodeCharacter codepoint = (UnicodeCharacter) *(bytes + *offset);
 
         buffer_size++;
         if (buffer_size + 1 > buffer_len) {
@@ -59,8 +61,12 @@ UnicodeString read_unicode_string(char *bytes, int length, int *offset) {
 }
 /* }}}1 */
 
-/* encode_to_unicode_string(const char*, int): char* {{{1 */
-char *encode_to_unicode_string(const char *string, int max_length) {
+/* encode_ntls_to_lpus(const char*, int): UnicodeString {{{1
+ *
+ * Takes a null-terminated locale string (i.e. char* string) and a length thereof
+ * and converts it to a length-prefixed unicode string as is used by Minecraft.
+ */
+UnicodeString encode_ntls_to_lpus(const char *string, int max_length) {
     int length = strlen(string);
     if (length > max_length) {
         return NULL;
@@ -68,25 +74,42 @@ char *encode_to_unicode_string(const char *string, int max_length) {
 
     int buffer_size = 0;
 
-    char *buffer = calloc(max_length, sizeof(char));
+    uint8_t *buffer = calloc(max_length, sizeof(UnicodeCharacter));
     if (!buffer) {
         return NULL;
     }
 
     unsigned char bytes_written = 0;
-    varint_encode(length, buffer, max_length, &bytes_written);
+    varint_encode(length, (char*) buffer, max_length, &bytes_written);
 
-    int i, off;
-    for (i = 0, off = bytes_written; i < length; i++, off++) {
-        buffer_size++;
+    memcpy(buffer + bytes_written, string, length - 1);
 
-        if (buffer_size > max_length) {
-            // string gets truncated
-            break;
-        }
+    return buffer;
+}
+/* }}}1 */
 
-        *(buffer + off) = *(string + i);
+/* encode_ntus_to_lpus(const char*, int): char* {{{1
+ * 
+ * Takes a null-terminated unicode string and a length thereof and converts it to a
+ * length-prefixed unicode string as is used by Minecraft.
+ */
+UnicodeString encode_ntus_to_lpus(const UnicodeString ustring, int max_length) {
+    int length = u8_strlen(ustring);
+    if (length > max_length) {
+        return NULL;
     }
+
+    int buffer_size = 0;
+
+    uint8_t *buffer = calloc(max_length, sizeof(UnicodeCharacter));
+    if (!buffer) {
+        return NULL;
+    }
+
+    unsigned char bytes_written = 0;
+    varint_encode(length, (char*) buffer, max_length, &bytes_written);
+
+    u8_cpy(buffer + bytes_written, ustring, length - 1);
 
     return buffer;
 }

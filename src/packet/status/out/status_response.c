@@ -33,4 +33,6 @@ int send_status_response(ConnectionPtr connection, PacketStatusOutStatusResponse
     }
 
     send_packet(connection, packed);
+
+    return 0;
 }
