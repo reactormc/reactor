@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/wait.h>
-#include "connection.h"
+#include "net/connection.h"
 #include "util/logger.h"
 
 #ifndef PORT

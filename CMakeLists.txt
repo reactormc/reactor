@@ -23,9 +23,6 @@ file(GLOB_RECURSE SOURCES src/*.c src/*.h)
 # Set libraries
 set(REACTOR_LIBS ${UNISTRING_LIB} ${JSONC_LIB})
 
-# Root folder should be in include path
-include_directories(./src)
-
 # Release build
 add_executable(reactor ${SOURCES})
 target_link_libraries(reactor ${REACTOR_LIBS})

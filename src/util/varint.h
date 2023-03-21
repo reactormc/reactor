@@ -37,7 +37,9 @@
 
 typedef unsigned long long VarInt; // Convenience
 char *varint_encode(VarInt varint, char *buf, int buf_len, unsigned char *bytes_written);
+
 VarInt varint_decode(char *buf, int buf_len, unsigned char *bytes_read);
+
 VarInt varint_decode_offset(char *buffer, int length, int *offset); // Convenience
 int varint_encoding_length(VarInt);
 
