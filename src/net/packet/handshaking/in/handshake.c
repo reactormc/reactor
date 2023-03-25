@@ -7,10 +7,10 @@ PacketHandshakingInHandshake *read_handshake(ReactorPacketPtr parent, byte_buffe
         return NULL;
     }
 
-    buffer->read_varint(buffer, &child->protocol_version);
+    buffer->read_varint(buffer, VARINT_MAX_LEN, &child->protocol_version);
     buffer->read_string(buffer, 255, &child->server_address);
     buffer->read_ushort(buffer, &child->server_port);
-    buffer->read_varint(buffer, &child->next_state);
+    buffer->read_varint(buffer, VARINT_MAX_LEN, &child->next_state);
 
     return child;
 }

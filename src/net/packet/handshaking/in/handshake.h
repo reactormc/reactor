@@ -7,7 +7,7 @@
 
 typedef struct packet_handshaking_in_handshake {
     VarInt protocol_version;
-    UnicodeString server_address;
+    uint8_t *server_address;
     uint16_t server_port;
     VarInt next_state;
 } PacketHandshakingInHandshake;

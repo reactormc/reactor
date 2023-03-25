@@ -135,6 +135,7 @@ int main(int argc, char **argv) {
 
         if (fork_status == 0) {
             close(sock_fd);
+            printf("reactor: starting child process to manage connection\n");
             handle_connection(remote_fd);
         } else {
             close(remote_fd);

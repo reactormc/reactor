@@ -59,7 +59,7 @@ void handle_status_request(ConnectionPtr conn, ReactorPacketPtr packet, byte_buf
     /* }}}2 */
 
     const char *data = json_object_to_json_string(response);
-    UnicodeString out = encode_ntls_to_lpus(data, 32767); // max length of json response
+    uint8_t *out = encode_ntls_to_lpus(data, 32767); // max length of json response
 
     /* dispose object */
     json_object_put(response);

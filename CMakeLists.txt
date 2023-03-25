@@ -17,11 +17,14 @@ if (NOT JSONC_LIB)
     message(FATAL_ERROR "json-c not found")
 endif()
 
+# Get zlib
+find_package(ZLIB)
+
 # All sources
 file(GLOB_RECURSE SOURCES src/*.c src/*.h)
 
 # Set libraries
-set(REACTOR_LIBS ${UNISTRING_LIB} ${JSONC_LIB})
+set(REACTOR_LIBS ${UNISTRING_LIB} ${JSONC_LIB} ZLIB::ZLIB)
 
 # Release build
 add_executable(reactor ${SOURCES})

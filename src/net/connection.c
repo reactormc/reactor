@@ -12,7 +12,7 @@
  * @param remote_fd
  */
 void handle_connection(int remote_fd) {
-    printf("reactor: client connected\n");
+    printf("handle_connection: client connected\n");
 
     ConnectionPtr conn = calloc(1, sizeof(Connection));
     if (!conn) {
@@ -24,7 +24,8 @@ void handle_connection(int remote_fd) {
     conn->state = STATE_HANDSHAKING;
 
     byte_buffer_ptr buffer;
-    if (init_byte_buffer(buffer) != BYTE_BUFFER_INIT_SUCCESS) {
+    if (init_byte_buffer(&buffer) != BYTE_BUFFER_INIT_SUCCESS) {
+        fprintf(stderr, "handle_connection: failed to initialize connection buffer\n");
         free(conn);
         exit(EXIT_FAILURE);
     }
@@ -36,11 +37,12 @@ void handle_connection(int remote_fd) {
 
             int read_status = buffer->write_network(buffer, conn->remote_fd);
             if (read_status == BYTE_BUFFER_WRITE_FAILURE) {
+                debug("handle_connection: network read failed\n");
                 free(conn);
                 free_byte_buffer(buffer);
                 exit(EXIT_FAILURE);
             } else if (read_status == BYTE_BUFFER_WRITE_NETWORK_CLIENT_DISCONNECT) {
-                printf("reactor: client disconnected\n");
+                printf("handle_connection: client disconnected\n");
                 free(conn);
                 free_byte_buffer(buffer);
                 exit(EXIT_SUCCESS);

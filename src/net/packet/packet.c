@@ -53,19 +53,19 @@ int create_packet_from_header(byte_buffer_ptr buffer, int compressed, ReactorPac
 
     VarInt packet_length = (*packet)->packet_length;
     if (!skip_packet_length) {
-        buffer->read_varint(buffer, &packet_length);
+        buffer->read_varint(buffer, VARINT_MAX_LEN, &packet_length);
 
         if (packet_length == 0) {
             debug("create_packet_from_header: read packet length 0\n");
             return -2;
         } else if (packet_length > buffer->remaining_length(buffer)) {
-            buffer->rewind(buffer, varint_encoding_length(packet_length));
+            buffer->roll_back(buffer, varint_encoding_length(packet_length));
             return -2;
         }
     }
 
     VarInt packet_id;
-    buffer->read_varint(buffer, &packet_id);
+    buffer->read_varint(buffer, VARINT_MAX_LEN, &packet_id);
     (*packet)->packet_id = packet_id;
 
     packet_length = buffer->remaining_length(buffer);

@@ -1,7 +1,6 @@
 #ifndef UTIL_BYTE_BUFFER_H
 #define UTIL_BYTE_BUFFER_H 1
 
-#include "unicode_string.h"
 #include "varint.h"
 
 #include <stdint.h>
@@ -45,9 +44,9 @@ typedef struct byte_buffer_t {
 
     int (*remaining_length)(byte_buffer_ptr self);
 
-    void (*rewind_last)(byte_buffer_ptr self);
+    void (*roll_back_last)(byte_buffer_ptr self);
 
-    void (*rewind)(byte_buffer_ptr self, int n_bytes);
+    void (*roll_back)(byte_buffer_ptr self, int n_bytes);
 
     int (*grow)(byte_buffer_ptr self);
 
@@ -76,15 +75,13 @@ typedef struct byte_buffer_t {
 
     int (*read_double)(byte_buffer_ptr self, double *out);
 
-    int (*read_string)(byte_buffer_ptr self, int max_length, UnicodeString *out);
+    int (*read_string)(byte_buffer_ptr self, int max_length, uint8_t **out);
 
-    int (*read_chat)(byte_buffer_ptr self, UnicodeString *out);
+    int (*read_chat)(byte_buffer_ptr self, uint8_t **out);
 
-    int (*read_identifier)(byte_buffer_ptr self, UnicodeString *out);
+    int (*read_identifier)(byte_buffer_ptr self, uint8_t **out);
 
-    int (*read_varint)(byte_buffer_ptr self, VarInt *out);
-
-    int (*read_varlong)(byte_buffer_ptr self, VarInt *out);
+    int (*read_varint)(byte_buffer_ptr self, int max_len, VarInt *out);
 
     /* writing */
     int (*write)(byte_buffer_ptr self, char *bytes, int n_bytes);
@@ -107,21 +104,19 @@ typedef struct byte_buffer_t {
 
     int (*write_double)(byte_buffer_ptr self, double in);
 
-    int (*write_nt_string)(byte_buffer_ptr self, int max_length, UnicodeString in);
+    int (*write_nt_string)(byte_buffer_ptr self, int max_length, uint8_t *in);
 
-    int (*write_lp_string)(byte_buffer_ptr self, int length, int max_length, UnicodeString in);
+    int (*write_lp_string)(byte_buffer_ptr self, int length, int max_length, uint8_t *in);
 
-    int (*write_nt_chat)(byte_buffer_ptr self, UnicodeString in);
+    int (*write_nt_chat)(byte_buffer_ptr self, uint8_t *in);
 
-    int (*write_lp_chat)(byte_buffer_ptr self, int length, UnicodeString in);
+    int (*write_lp_chat)(byte_buffer_ptr self, int length, uint8_t *in);
 
-    int (*write_nt_identifier)(byte_buffer_ptr self, UnicodeString in);
+    int (*write_nt_identifier)(byte_buffer_ptr self, uint8_t *in);
 
-    int (*write_lp_identifier)(byte_buffer_ptr self, int length, UnicodeString in);
+    int (*write_lp_identifier)(byte_buffer_ptr self, int length, uint8_t *in);
 
-    int (*write_varint)(byte_buffer_ptr self, VarInt in);
-
-    int (*write_varlong)(byte_buffer_ptr self, VarInt in);
+    int (*write_varint)(byte_buffer_ptr self, int max_len, VarInt in);
 
     int (*write_network)(byte_buffer_ptr self, int remote_fd);
 } byte_buffer_t;
@@ -168,7 +163,7 @@ typedef union int8_to_double {
     double double_value;
 } int8_to_double;
 
-int init_byte_buffer(byte_buffer_t *buf);
+int init_byte_buffer(byte_buffer_t **buf);
 
 void free_byte_buffer(byte_buffer_t *buf);
 
