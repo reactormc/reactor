@@ -1,7 +1,6 @@
 #include "byte_buffer.h"
 #include "logger.h"
 #include "unicode_string.h"
-#include "varint.h"
 
 #include <string.h>
 #include <arpa/inet.h>
@@ -24,7 +23,7 @@ static char *bb_next_bytes(byte_buffer_ptr self) {
 }
 
 static char *bb_bytes_at(byte_buffer_ptr self, int offset) {
-    if (self->read_offset + offset > self->buffer_size) {
+    if (offset > self->buffer_size) {
         return NULL;
     }
 
@@ -95,7 +94,7 @@ static int bb_read(byte_buffer_ptr self, int n_bytes, char out[n_bytes]) {
 
     int i;
     for (i = 0; i < n_bytes; i++) {
-        out[i] = *(self->bytes + i);
+        out[i] = *(self->next_bytes(self) + i);
     }
 
     self->read_offset += n_bytes;
@@ -235,7 +234,7 @@ static int bb_read_string(byte_buffer_ptr self, int max_length, uint8_t **out) {
     }
 
     VarInt str_len = 0;
-    if (self->read_varint(self, VARINT_MAX_LEN, &str_len) == BYTE_BUFFER_READ_OUT_OF_BOUNDS) {
+    if (self->read_varint(self, &str_len) == BYTE_BUFFER_READ_OUT_OF_BOUNDS) {
         free(*out);
         *out = NULL;
         return BYTE_BUFFER_READ_OUT_OF_BOUNDS;
@@ -294,14 +293,14 @@ static int bb_read_identifier(byte_buffer_ptr self, uint8_t **out) {
     return self->read_string(self, 32767, out);
 }
 
-static int bb_read_varint(byte_buffer_ptr self, int max_len, VarInt *out) {
-    if (self->read_offset + max_len >= self->buffer_size) {
+static int bb_read_varint(byte_buffer_ptr self, VarInt *out) {
+    if (self->read_offset + 1 >= self->buffer_size) {
         return BYTE_BUFFER_READ_OUT_OF_BOUNDS;
     }
 
     uint8_t bytes_read = 0;
 
-    *out = varint_decode(self->bytes + self->read_offset, self->remaining_length(self), &bytes_read);
+    *out = varint_decode(self->next_bytes(self), self->remaining_length(self), &bytes_read);
 
     self->read_offset += bytes_read;
     self->last_read_size = bytes_read;
@@ -440,8 +439,8 @@ static int bb_write_lp_identifier(byte_buffer_ptr self, int length, uint8_t *in)
     return self->write_lp_string(self, length, 32767, in);
 }
 
-static int bb_write_varint(byte_buffer_ptr self, int max_len, VarInt in) {
-    if (self->write_offset + max_len > self->buffer_size) {
+static int bb_write_varint(byte_buffer_ptr self, VarInt in) {
+    if (self->write_offset + 1 > self->buffer_size) {
         if (self->grow(self) != BYTE_BUFFER_GROW_SUCCESS) {
             return BYTE_BUFFER_WRITE_OUT_OF_BOUNDS;
         }

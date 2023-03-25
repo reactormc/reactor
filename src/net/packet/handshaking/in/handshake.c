@@ -1,5 +1,6 @@
 #include "handshake.h"
 #include "../../../../util/logger.h"
+#include <stdlib.h>
 
 PacketHandshakingInHandshake *read_handshake(ReactorPacketPtr parent, byte_buffer_ptr buffer) {
     PacketHandshakingInHandshake *child = calloc(1, sizeof(PacketHandshakingInHandshake));
@@ -7,10 +8,17 @@ PacketHandshakingInHandshake *read_handshake(ReactorPacketPtr parent, byte_buffe
         return NULL;
     }
 
-    buffer->read_varint(buffer, VARINT_MAX_LEN, &child->protocol_version);
+    buffer->read_varint(buffer, &child->protocol_version);
+    debug("read protocol version: %d\n", child->protocol_version);
+    
     buffer->read_string(buffer, 255, &child->server_address);
+    debug("read server address: %s\n", child->server_address);
+
     buffer->read_ushort(buffer, &child->server_port);
-    buffer->read_varint(buffer, VARINT_MAX_LEN, &child->next_state);
+    debug("read server port: %d\n", child->server_port);
+   
+    buffer->read_varint(buffer, &child->next_state);
+    debug("read next state: %d\n", child->next_state);
 
     return child;
 }
@@ -31,6 +39,9 @@ void handle_handshake(ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_p
     } else if (handshake->next_state == STATE_LOGIN) {
         debug("handle_handshake: switching to login state\n");
         conn->state = STATE_LOGIN;
+    } else {
+        debug("handle_handshake: error! unknown next state intention\n");
+        exit(EXIT_FAILURE);
     }
 
     free(handshake);

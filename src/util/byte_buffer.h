@@ -5,8 +5,8 @@
 
 #include <stdint.h>
 
-#define INITIAL_BYTE_BUFFER_SIZE (2 << 12)  /* 8kB start size */
-#define MAXIMUM_BYTE_BUFFER_SIZE (2 << 20)  /* 2MB maximum size */
+#define INITIAL_BYTE_BUFFER_SIZE (1 << 7)  /* 128B start size */
+#define MAXIMUM_BYTE_BUFFER_SIZE (1 << 21)  /* 2MB maximum size */
  
 extern const int BYTE_BUFFER_INIT_SUCCESS; //0
 extern const int BYTE_BUFFER_INIT_FAILURE; //1
@@ -81,7 +81,9 @@ typedef struct byte_buffer_t {
 
     int (*read_identifier)(byte_buffer_ptr self, uint8_t **out);
 
-    int (*read_varint)(byte_buffer_ptr self, int max_len, VarInt *out);
+    int (*read_varint)(byte_buffer_ptr self, VarInt *out);
+    
+    int (*read_varlong)(byte_buffer_ptr self, VarInt *out);
 
     /* writing */
     int (*write)(byte_buffer_ptr self, char *bytes, int n_bytes);
@@ -116,7 +118,9 @@ typedef struct byte_buffer_t {
 
     int (*write_lp_identifier)(byte_buffer_ptr self, int length, uint8_t *in);
 
-    int (*write_varint)(byte_buffer_ptr self, int max_len, VarInt in);
+    int (*write_varint)(byte_buffer_ptr self, VarInt in);
+
+    int (*write_varlong)(byte_buffer_ptr self, VarInt in);
 
     int (*write_network)(byte_buffer_ptr self, int remote_fd);
 } byte_buffer_t;

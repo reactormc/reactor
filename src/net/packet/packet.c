@@ -53,7 +53,7 @@ int create_packet_from_header(byte_buffer_ptr buffer, int compressed, ReactorPac
 
     VarInt packet_length = (*packet)->packet_length;
     if (!skip_packet_length) {
-        buffer->read_varint(buffer, VARINT_MAX_LEN, &packet_length);
+        buffer->read_varint(buffer, &packet_length);
 
         if (packet_length == 0) {
             debug("create_packet_from_header: read packet length 0\n");
@@ -65,7 +65,7 @@ int create_packet_from_header(byte_buffer_ptr buffer, int compressed, ReactorPac
     }
 
     VarInt packet_id;
-    buffer->read_varint(buffer, VARINT_MAX_LEN, &packet_id);
+    buffer->read_varint(buffer, &packet_id);
     (*packet)->packet_id = packet_id;
 
     packet_length = buffer->remaining_length(buffer);
@@ -80,7 +80,6 @@ int create_packet_from_header(byte_buffer_ptr buffer, int compressed, ReactorPac
 
     memcpy(data_buf, buffer->next_bytes(buffer), packet_length);
     (*packet)->data = data_buf;
-    buffer->read_offset += (int) packet_length;
 
     return 0;
 }
