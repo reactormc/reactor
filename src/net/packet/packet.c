@@ -46,9 +46,9 @@ int create_packet_from_header(byte_buffer_ptr buffer, int compressed, ReactorPac
         }
     }
 
-    if (buffer->remaining_length(buffer) < VARINT_MAX_LEN) {
+    if (buffer->remaining_length(buffer) < 1) {
         debug("create_packet_from_header: cannot read a full varint\n");
-        return -2;
+        return -3;
     }
 
     VarInt packet_length = (*packet)->packet_length;
@@ -57,8 +57,10 @@ int create_packet_from_header(byte_buffer_ptr buffer, int compressed, ReactorPac
 
         if (packet_length == 0) {
             debug("create_packet_from_header: read packet length 0\n");
-            return -2;
+            buffer->roll_back(buffer, varint_encoding_length(packet_length));
+            return -3;
         } else if (packet_length > buffer->remaining_length(buffer)) {
+            debug("create_packet_from_header: not enough data in buffer to complete packet\n");
             buffer->roll_back(buffer, varint_encoding_length(packet_length));
             return -2;
         }

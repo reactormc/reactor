@@ -19,7 +19,6 @@ extern const int BYTE_BUFFER_READ_FAILURE; //2
 extern const int BYTE_BUFFER_WRITE_SUCCESS; //0
 extern const int BYTE_BUFFER_WRITE_OUT_OF_BOUNDS; //1
 extern const int BYTE_BUFFER_WRITE_FAILURE; //2
-extern const int BYTE_BUFFER_WRITE_NETWORK_CLIENT_DISCONNECT; //3
 
 typedef struct byte_buffer_t *byte_buffer_ptr;
 
@@ -53,6 +52,8 @@ typedef struct byte_buffer_t {
     void (*reset)(byte_buffer_ptr self);
 
     void (*reroll)(byte_buffer_ptr self);
+
+    int (*is_empty)(byte_buffer_ptr self);
 
     /* reading */
     int (*read)(byte_buffer_ptr self, int n_bytes, char *out);
@@ -121,8 +122,6 @@ typedef struct byte_buffer_t {
     int (*write_varint)(byte_buffer_ptr self, VarInt in);
 
     int (*write_varlong)(byte_buffer_ptr self, VarInt in);
-
-    int (*write_network)(byte_buffer_ptr self, int remote_fd);
 } byte_buffer_t;
 
 typedef union int8_to_int16 {

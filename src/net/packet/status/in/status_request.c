@@ -64,5 +64,5 @@ void handle_status_request(ConnectionPtr conn, ReactorPacketPtr packet, byte_buf
     /* dispose object */
     json_object_put(response);
 
-    send_status_response(conn, create_status_response((uint8_t *) out));
+    send_status_response(conn, create_status_response(out));
 }

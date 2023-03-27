@@ -16,7 +16,6 @@ const int BYTE_BUFFER_READ_FAILURE = 2;
 const int BYTE_BUFFER_WRITE_SUCCESS = 0;
 const int BYTE_BUFFER_WRITE_OUT_OF_BOUNDS = 1;
 const int BYTE_BUFFER_WRITE_FAILURE = 2;
-const int BYTE_BUFFER_WRITE_NETWORK_CLIENT_DISCONNECT = 3;
 
 static char *bb_next_bytes(byte_buffer_ptr self) {
     return self->bytes_at(self, self->read_offset);
@@ -85,6 +84,10 @@ static void bb_reroll(byte_buffer_ptr self) {
 
     self->buffer_size = size;
     self->write_offset = size;
+}
+
+static int bb_is_empty(byte_buffer_ptr self) {
+    return self->buffer_size == 0 ? 1 : 0;
 }
 
 static int bb_read(byte_buffer_ptr self, int n_bytes, char out[n_bytes]) {
@@ -294,13 +297,16 @@ static int bb_read_identifier(byte_buffer_ptr self, uint8_t **out) {
 }
 
 static int bb_read_varint(byte_buffer_ptr self, VarInt *out) {
-    if (self->read_offset + 1 >= self->buffer_size) {
+    if (self->read_offset + 1 > self->buffer_size) {
+        debug("bb_read_varint: cannot read varint, out of bounds\n");
         return BYTE_BUFFER_READ_OUT_OF_BOUNDS;
     }
 
     uint8_t bytes_read = 0;
 
     *out = varint_decode(self->next_bytes(self), self->remaining_length(self), &bytes_read);
+
+    debug("bb_read_varint: read varint %llu\n", *out);
 
     self->read_offset += bytes_read;
     self->last_read_size = bytes_read;
@@ -456,23 +462,6 @@ static int bb_write_varint(byte_buffer_ptr self, VarInt in) {
     return BYTE_BUFFER_WRITE_SUCCESS;
 }
 
-static int bb_write_network(byte_buffer_ptr self, int remote_fd) {
-    char tmp[INITIAL_BYTE_BUFFER_SIZE] = {0};
-
-    debug("write_network: recv\n");
-
-    ssize_t bytes_read;
-    if ((bytes_read = recv(remote_fd, tmp, INITIAL_BYTE_BUFFER_SIZE, 0)) == -1) {
-        return BYTE_BUFFER_WRITE_FAILURE;
-    }
-
-    if (bytes_read == 0) {
-        return BYTE_BUFFER_WRITE_NETWORK_CLIENT_DISCONNECT;
-    }
-
-    return self->write(self, tmp, (int) bytes_read);
-}
-
 int init_byte_buffer(byte_buffer_t **buf) {
     *buf = calloc(1, sizeof(byte_buffer_t));
     if (!*buf) {
@@ -503,6 +492,7 @@ int init_byte_buffer(byte_buffer_t **buf) {
     (*buf)->grow = &bb_grow;
     (*buf)->reset = &bb_reset;
     (*buf)->reroll = &bb_reroll;
+    (*buf)->is_empty = &bb_is_empty;
 
     /* reading */
     (*buf)->read = &bb_read;
@@ -538,7 +528,6 @@ int init_byte_buffer(byte_buffer_t **buf) {
     (*buf)->write_nt_identifier = &bb_write_nt_identifier;
     (*buf)->write_lp_identifier = &bb_write_lp_identifier;
     (*buf)->write_varint = &bb_write_varint;
-    (*buf)->write_network = &bb_write_network;
 
     return BYTE_BUFFER_INIT_SUCCESS;
 }

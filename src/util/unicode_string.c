@@ -11,12 +11,10 @@
  * and converts it to a length-prefixed unicode string as is used by Minecraft.
  */
 uint8_t *encode_ntls_to_lpus(const char *string, int max_length) {
-    int length = strlen(string);
+    int length = (int) strlen(string);
     if (length > max_length) {
         return NULL;
     }
-
-    int buffer_size = 0;
 
     uint8_t *buffer = calloc(max_length, sizeof(ucs4_t));
     if (!buffer) {
