@@ -7,7 +7,7 @@
 
 #define INITIAL_BYTE_BUFFER_SIZE (1 << 7)  /* 128B start size */
 #define MAXIMUM_BYTE_BUFFER_SIZE (1 << 21)  /* 2MB maximum size */
- 
+
 extern const int BYTE_BUFFER_INIT_SUCCESS; //0
 extern const int BYTE_BUFFER_INIT_FAILURE; //1
 extern const int BYTE_BUFFER_GROW_SUCCESS; //0
@@ -85,7 +85,7 @@ typedef struct byte_buffer_t {
     int (*read_identifier)(byte_buffer_ptr self, uint8_t **out);
 
     int (*read_varint)(byte_buffer_ptr self, VarInt *out);
-    
+
     int (*read_varlong)(byte_buffer_ptr self, VarInt *out);
 
     /* writing */

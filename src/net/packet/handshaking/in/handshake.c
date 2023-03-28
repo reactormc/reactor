@@ -10,13 +10,13 @@ PacketHandshakingInHandshake *read_handshake(ReactorPacketPtr parent, byte_buffe
 
     buffer->read_varint(buffer, &child->protocol_version);
     debug("read protocol version: %d\n", child->protocol_version);
-    
+
     buffer->read_string(buffer, 255, &child->server_address);
     debug("read server address: %s\n", child->server_address);
 
     buffer->read_ushort(buffer, &child->server_port);
     debug("read server port: %d\n", child->server_port);
-   
+
     buffer->read_varint(buffer, &child->next_state);
     debug("read next state: %d\n", child->next_state);
 
