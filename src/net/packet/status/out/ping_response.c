@@ -1,6 +1,8 @@
 #include "ping_response.h"
 #include "names.h"
 #include "../../packet_handler.h"
+
+#include <stdlib.h>
 #include <arpa/inet.h>
 
 PacketStatusOutPingResponse *create_ping_response(uint64_t response) {

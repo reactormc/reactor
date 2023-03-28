@@ -197,7 +197,7 @@ static int bb_read_long(byte_buffer_ptr self, int64_t *out) {
     }
 
     int8_to_int64 converter;
-    memcpy(converter.chars, tmp, 7);
+    memcpy(converter.chars, tmp, 8);
 
     *out = (int64_t) ntohl(converter.long_value);
 
@@ -314,6 +314,26 @@ static int bb_read_varint(byte_buffer_ptr self, VarInt *out) {
 
     self->read_offset += bytes_read;
     self->last_read_size = bytes_read;
+
+    return BYTE_BUFFER_READ_SUCCESS;
+}
+
+static int bb_read_uuid(byte_buffer_ptr self, uuid_t *out) {
+    char tmp[16];
+    if (self->read(self, 16, tmp) != BYTE_BUFFER_READ_SUCCESS) {
+        return BYTE_BUFFER_READ_FAILURE;
+    }
+
+    uuid_t uuid;
+    memcpy(uuid.bit, tmp, 16);
+
+    uint64_t msb = uuid.word[0];
+    uint64_t lsb = uuid.word[1];
+
+    uuid.word[0] = lsb;
+    uuid.word[1] = msb;
+
+    *out = uuid;
 
     return BYTE_BUFFER_READ_SUCCESS;
 }
@@ -466,6 +486,16 @@ static int bb_write_varint(byte_buffer_ptr self, VarInt in) {
     return BYTE_BUFFER_WRITE_SUCCESS;
 }
 
+static int bb_write_uuid(byte_buffer_ptr self, uuid_t uuid) {
+    uint64_t lsb = htonl(uuid.word[0]);
+    uint64_t msb = htonl(uuid.word[1]);
+
+    uuid.word[0] = msb;
+    uuid.word[1] = lsb;
+
+    return self->write(self, uuid.bit, 16);
+}
+
 int init_byte_buffer(byte_buffer_t **buf) {
     *buf = calloc(1, sizeof(byte_buffer_t));
     if (!*buf) {
@@ -514,6 +544,7 @@ int init_byte_buffer(byte_buffer_t **buf) {
     (*buf)->read_chat = &bb_read_chat;
     (*buf)->read_identifier = &bb_read_identifier;
     (*buf)->read_varint = &bb_read_varint;
+    (*buf)->read_uuid = &bb_read_uuid;
 
     /* writing */
     (*buf)->write = &bb_write;
@@ -533,6 +564,7 @@ int init_byte_buffer(byte_buffer_t **buf) {
     (*buf)->write_nt_identifier = &bb_write_nt_identifier;
     (*buf)->write_lp_identifier = &bb_write_lp_identifier;
     (*buf)->write_varint = &bb_write_varint;
+    (*buf)->write_uuid = &bb_write_uuid;
 
     return BYTE_BUFFER_INIT_SUCCESS;
 }

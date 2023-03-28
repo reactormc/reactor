@@ -2,7 +2,6 @@
 #define PACKET_STATUS_OUT_STATUS_RESPONSE_H 1
 
 #include "../../../connection.h"
-#include "../../../../util/unicode_string.h"
 
 typedef struct packet_status_out_status_response {
     uint8_t *response;

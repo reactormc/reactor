@@ -1,6 +1,7 @@
 #include "status_request.h"
 #include "../out/status_response.h"
 #include "../../../../util/logger.h"
+#include "../../../../util/unicode_string.h"
 
 #include <json-c/json.h>
 

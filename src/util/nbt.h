@@ -10,8 +10,8 @@
   with this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 */
 
-#ifndef NBT_H
-#define NBT_H
+#ifndef UTIL_NBT_H
+#define UTIL_NBT_H
 
 #define LIBNBT_VERSION 10
 #define LIBNBT_NBT_VERSION 19133

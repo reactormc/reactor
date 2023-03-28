@@ -1,6 +1,9 @@
 #include "status_response.h"
 #include "names.h"
 #include "../../packet_handler.h"
+#include "../../../../util/unicode_string.h"
+
+#include <stdlib.h>
 
 PacketStatusOutStatusResponse *create_status_response(uint8_t *response) {
     PacketStatusOutStatusResponse *packet = calloc(1, sizeof(PacketStatusOutStatusResponse));

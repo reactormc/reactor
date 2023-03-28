@@ -2,6 +2,7 @@
 #define UTIL_BYTE_BUFFER_H 1
 
 #include "varint.h"
+#include "uuid.h"
 
 #include <stdint.h>
 
@@ -86,7 +87,7 @@ typedef struct byte_buffer_t {
 
     int (*read_varint)(byte_buffer_ptr self, VarInt *out);
 
-    int (*read_varlong)(byte_buffer_ptr self, VarInt *out);
+    int (*read_uuid)(byte_buffer_ptr self, uuid_t *out);
 
     /* writing */
     int (*write)(byte_buffer_ptr self, char *bytes, int n_bytes);
@@ -123,7 +124,7 @@ typedef struct byte_buffer_t {
 
     int (*write_varint)(byte_buffer_ptr self, VarInt in);
 
-    int (*write_varlong)(byte_buffer_ptr self, VarInt in);
+    int (*write_uuid)(byte_buffer_ptr self, uuid_t in);
 } byte_buffer_t;
 
 typedef union int8_to_int16 {

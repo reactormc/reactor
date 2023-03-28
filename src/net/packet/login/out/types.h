@@ -7,4 +7,4 @@
 #include "set_compression.h"
 #include "login_plugin_request.h"
 
-#endif //REACTOR_TYPES_H
+#endif
