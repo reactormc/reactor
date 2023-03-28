@@ -34,15 +34,19 @@ int send_packet(ConnectionPtr conn, ReactorPacketPtr packet) {
     ssize_t total_bytes_sent = 0;
 
     while (1) {
-        ssize_t bytes_sent = send(conn->remote_fd, encoded, total_size, 0);
+        debug("send_packet: calling send()\n");
+        ssize_t bytes_sent = send(conn->remote_fd, encoded + total_bytes_sent, total_size - total_bytes_sent, 0);
 
         if (bytes_sent == -1) {
-            perror("send_packet - send");
+            perror("send_packet: send");
             return -1;
         } else {
+            debug("send_packet: sent %d bytes, recording...\n", bytes_sent);
+
             total_bytes_sent += bytes_sent;
 
             if (total_bytes_sent >= total_size) {
+                debug("send_packet: no more tries required\n");
                 break;
             }
         }

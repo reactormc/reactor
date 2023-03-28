@@ -24,7 +24,7 @@ uint8_t *encode_ntls_to_lpus(const char *string, int max_length) {
     unsigned char bytes_written = 0;
     varint_encode(length, (char *) buffer, max_length, &bytes_written);
 
-    memcpy(buffer + bytes_written, string, length - 1);
+    memcpy(buffer + bytes_written, string, length);
 
     return buffer;
 }
@@ -48,7 +48,7 @@ uint8_t *encode_ntus_to_lpus(const uint8_t *string, int max_length) {
 
     unsigned char bytes_written = 0;
     varint_encode(length, (char *) buffer, max_length, &bytes_written);
-    u8_cpy(buffer + bytes_written, string, length - 1);
+    u8_cpy(buffer + bytes_written, string, length);
 
     return buffer;
 }

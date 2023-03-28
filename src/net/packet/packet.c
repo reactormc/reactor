@@ -46,23 +46,17 @@ int create_packet_from_header(byte_buffer_ptr buffer, int compressed, ReactorPac
         }
     }
 
-    if (buffer->remaining_length(buffer) < 1) {
-        debug("create_packet_from_header: cannot read a full varint\n");
-        return -3;
-    }
-
     VarInt packet_length = (*packet)->packet_length;
     if (!skip_packet_length) {
         buffer->read_varint(buffer, &packet_length);
 
-        if (packet_length == 0) {
-            debug("create_packet_from_header: read packet length 0\n");
-            buffer->roll_back(buffer, varint_encoding_length(packet_length));
-            return -3;
-        } else if (packet_length > buffer->remaining_length(buffer)) {
+        if (packet_length > buffer->remaining_length(buffer)) {
             debug("create_packet_from_header: not enough data in buffer to complete packet\n");
             buffer->roll_back(buffer, varint_encoding_length(packet_length));
             return -2;
+        } else if (packet_length == 0) {
+            debug("create_packet_from_header: ignoring length zero packet\n");
+            return -3;
         }
     }
 
@@ -70,7 +64,7 @@ int create_packet_from_header(byte_buffer_ptr buffer, int compressed, ReactorPac
     buffer->read_varint(buffer, &packet_id);
     (*packet)->packet_id = packet_id;
 
-    packet_length = buffer->remaining_length(buffer);
+    packet_length -= varint_encoding_length(packet_id);
     (*packet)->packet_length = packet_length;
 
     debug("create_packet_from_header: allocating data buf of length %d\n", packet_length);
@@ -87,7 +81,7 @@ int create_packet_from_header(byte_buffer_ptr buffer, int compressed, ReactorPac
 }
 
 char *encode_packet(ReactorPacketPtr packet) {
-    int buffer_len = packet->packet_length + varint_encoding_length(packet->packet_length);
+    int buffer_len = (int) packet->packet_length + varint_encoding_length(packet->packet_length);
 
     char *buffer = calloc(buffer_len, sizeof(char));
     if (!buffer) {
@@ -104,10 +98,7 @@ char *encode_packet(ReactorPacketPtr packet) {
     varint_encode(packet->packet_id, buffer + bytes_written, buffer_len - bytes_written, &bytes_tmp);
     bytes_written += bytes_tmp;
 
-    int remaining_length = packet->packet_length - bytes_tmp;
-    for (int i = 0; i < remaining_length; i++, bytes_written++) {
-        *(buffer + bytes_written) = *(packet->data + i);
-    }
+    memcpy(buffer + bytes_written, packet->data, packet->packet_length - bytes_tmp);
 
     return buffer;
 }

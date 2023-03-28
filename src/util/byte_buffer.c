@@ -22,7 +22,7 @@ static char *bb_next_bytes(byte_buffer_ptr self) {
 }
 
 static char *bb_bytes_at(byte_buffer_ptr self, int offset) {
-    if (offset > self->buffer_size) {
+    if (offset >= self->buffer_size) {
         return NULL;
     }
 
@@ -88,6 +88,10 @@ static void bb_reroll(byte_buffer_ptr self) {
 
 static int bb_is_empty(byte_buffer_ptr self) {
     return self->buffer_size == 0 ? 1 : 0;
+}
+
+static int bb_has_more_bytes(byte_buffer_ptr self) {
+    return self->is_empty(self) ? 0 : self->remaining_length(self);
 }
 
 static int bb_read(byte_buffer_ptr self, int n_bytes, char out[n_bytes]) {
@@ -493,6 +497,7 @@ int init_byte_buffer(byte_buffer_t **buf) {
     (*buf)->reset = &bb_reset;
     (*buf)->reroll = &bb_reroll;
     (*buf)->is_empty = &bb_is_empty;
+    (*buf)->has_more_bytes = &bb_has_more_bytes;
 
     /* reading */
     (*buf)->read = &bb_read;

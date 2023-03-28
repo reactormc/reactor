@@ -55,6 +55,8 @@ typedef struct byte_buffer_t {
 
     int (*is_empty)(byte_buffer_ptr self);
 
+    int (*has_more_bytes)(byte_buffer_ptr self);
+
     /* reading */
     int (*read)(byte_buffer_ptr self, int n_bytes, char *out);
 

@@ -53,37 +53,34 @@ void handle_connection(int remote_fd) {
         exit(EXIT_FAILURE);
     }
 
-    int rerolled = 0;
-
     while (1) {
-        if (rerolled || buffer->is_empty(buffer)) {
-            debug("handle_connection: reading network\n");
-            int bytes_read = poll_network(remote_fd, buffer);
-            if (bytes_read == -1) {
-                debug("handle_connection: network read fail\n");
-                free_byte_buffer(buffer);
-                free(conn);
-                exit(EXIT_FAILURE);
-            } else if (bytes_read == 0) {
-                debug("handle_connection: client disconnected\n");
-                free_byte_buffer(buffer);
-                free(conn);
-                exit(EXIT_SUCCESS);
-            }
+        debug("handle_connection: recv()\n");
+        int bytes_read = poll_network(remote_fd, buffer);
+        if (bytes_read == -1) {
+            debug("handle_connection: network read fail\n");
+            free_byte_buffer(buffer);
+            free(conn);
+            exit(EXIT_FAILURE);
+        } else if (bytes_read == 0) {
+            debug("handle_connection: client disconnected\n");
+            free_byte_buffer(buffer);
+            free(conn);
+            exit(EXIT_SUCCESS);
+        }
 
-            rerolled = 0;
+        if (!buffer->has_more_bytes(buffer)) {
+            debug("handle_connection: no more bytes to read\n");
+            continue;
         }
 
         ReactorPacketPtr packet = NULL;
         switch (create_packet_from_header(buffer, 0, &packet)) {
             case -3:
-                debug("handle_connection: nothing left in buffer\n");
-                buffer->reset(buffer);
+                debug("handle_connection: skipping length zero packet\n");
                 break;
             case -2:
                 debug("handle_connection: read partial packet, re-rolling buffer\n");
                 buffer->reroll(buffer);
-                rerolled = 1;
                 break;
             case -1:
                 debug("handle_connection: failed to allocate space for packet\n");
