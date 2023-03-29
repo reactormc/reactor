@@ -24,7 +24,7 @@ ReactorPacketPtr pack_status_response(PacketStatusOutStatusResponse *response) {
     int length = (int) u8_strlen(response->response);
 
     packet->packet_length += length;
-    packet->data = (char *) response->response;
+    packet->data->write_bytes(packet->data, length, (int8_t*) response->response);
 
     return packet;
 }

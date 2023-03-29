@@ -17,7 +17,7 @@ PacketStatusInPingRequest *read_ping_request(ReactorPacketPtr parent, byte_buffe
     return child;
 }
 
-void handle_ping_request(ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer) {
+void handle_ping_request(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer) {
     PacketStatusInPingRequest *ping_request = read_ping_request(packet, buffer);
     if (!ping_request) {
         perror("handle_ping_request");

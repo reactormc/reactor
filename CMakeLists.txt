@@ -20,11 +20,29 @@ endif()
 # Get zlib
 find_package(ZLIB)
 
+# Get libtomcrypt
+find_library(TOMCRYPT_LIB tomcrypt)
+if (NOT TOMCRYPT_LIB)
+    message(FATAL_ERROR "libtomcrypt not found")
+endif()
+
+# Get libtommath
+find_library(TOMMATH_LIB tommath)
+if (NOT TOMMATH_LIB)
+    message(FATAL_ERROR "libtommath not found")
+endif()
+
+# Get libcurl
+find_package(CURL)
+if (NOT CURL_FOUND)
+    message(FATAL_ERROR "libcurl not found")
+endif()
+
 # All sources
-file(GLOB_RECURSE SOURCES src/*.c src/*.h)
+file(GLOB_RECURSE SOURCES src/*.c src/*.h deps/*.c deps/*.h)
 
 # Set libraries
-set(REACTOR_LIBS ${UNISTRING_LIB} ${JSONC_LIB} ZLIB::ZLIB)
+set(REACTOR_LIBS ${UNISTRING_LIB} ${JSONC_LIB} ZLIB::ZLIB ${TOMCRYPT_LIB} ${TOMMATH_LIB} ${CURL_LIBRARIES})
 
 # Release build
 add_executable(reactor ${SOURCES})

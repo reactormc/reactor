@@ -1,3 +1,6 @@
+#include "server.h"
+#include "util/logger.h"
+
 #include <string.h>
 #include <netdb.h>
 #include <stdio.h>
@@ -5,53 +8,27 @@
 #include <errno.h>
 #include <unistd.h>
 #include <signal.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
 #include <sys/wait.h>
-#include "net/connection.h"
-#include "util/logger.h"
 
 #ifndef PORT
 #define PORT "25565"
 #endif
 
-/* sigchld_handler(int): void {{{1 */
-void sigchld_handler(int signal) {
+void sigchld_handler(int ignored) {
     int saved_errno = errno;
+    debug("reactor: received sigchld, waiting for exit\n");
     while (waitpid(-1, NULL, WNOHANG) > 0);
     errno = saved_errno;
 }
-/* }}}1 */
 
-/* create_server_hints(struct addrinfo*): void {{{1 */
-void create_server_hints(struct addrinfo *hints) {
-    if (!hints) {
-        return;
-    }
-
-    memset(hints, 0, sizeof(*hints));
-    hints->ai_family = AF_UNSPEC;
-    hints->ai_socktype = SOCK_STREAM;
-    hints->ai_flags = AI_PASSIVE;
-}
-/* }}}1 */
-
-/* get_in_addr(struct sockaddr*): void* {{{1 */
-void *get_in_addr(struct sockaddr *addr) {
-    if (addr->sa_family == AF_INET) {
-        return &(((struct sockaddr_in *) addr)->sin_addr);
-    }
-
-    return &(((struct sockaddr_in6 *) addr)->sin6_addr);
-}
-/* }}}1 */
-
-/* main(int, char**): int {{{1 */
 int main(int argc, char **argv) {
     debug("reactor: starting up\n");
 
     struct addrinfo hints;
-    create_server_hints(&hints);
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
 
     int status;
     struct addrinfo *server_info;
@@ -60,26 +37,26 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    int sock_fd, yes = 1;
+    int server_socket_fd, yes = 1;
     struct addrinfo *result;
     for (result = server_info; result; result = result->ai_next) {
-        if ((sock_fd = socket(result->ai_family, result->ai_socktype,
-                              result->ai_protocol)) == -1) {
+        if ((server_socket_fd = socket(result->ai_family, result->ai_socktype,
+                                       result->ai_protocol)) == -1) {
 
             perror("socket");
             continue;
         }
 
-        if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &yes,
+        if (setsockopt(server_socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes,
                        sizeof(int)) == -1) {
 
             perror("setsockopt");
             exit(1);
         }
 
-        if (bind(sock_fd, result->ai_addr, result->ai_addrlen) == -1) {
+        if (bind(server_socket_fd, result->ai_addr, result->ai_addrlen) == -1) {
             perror("bind");
-            close(sock_fd);
+            close(server_socket_fd);
             continue;
         }
 
@@ -93,7 +70,7 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    if (listen(sock_fd, 10) == -1) {
+    if (listen(server_socket_fd, 10) == -1) {
         perror("listen");
         exit(1);
     }
@@ -107,41 +84,7 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    printf("reactor: waiting for connections...\n");
-
-    while (1) {
-        struct sockaddr_storage their_addr;
-        socklen_t sin_size = sizeof(their_addr);
-
-        int remote_fd = accept(sock_fd, (struct sockaddr *) &their_addr,
-                               &sin_size);
-
-        if (remote_fd == -1) {
-            perror("accept");
-            continue;
-        }
-
-        char s[INET6_ADDRSTRLEN];
-        inet_ntop(their_addr.ss_family,
-                  get_in_addr((struct sockaddr *) &their_addr), s, sizeof(s));
-
-        printf("reactor: got connection from %s\n", s);
-
-        int fork_status;
-        if ((fork_status = fork()) == -1) {
-            perror("reactor: fork");
-            exit(1);
-        }
-
-        if (fork_status == 0) {
-            close(sock_fd);
-            printf("reactor: starting child process to manage connection\n");
-            handle_connection(remote_fd);
-        } else {
-            close(remote_fd);
-        }
-    }
+    start_server((uint8_t *) "reactormc", server_socket_fd);
 
     return 0;
 }
-/* }}}1 */

@@ -1,5 +1,5 @@
-#ifndef PACKET_TYPES_H
-#define PACKET_TYPES_H 1
+#ifndef NET_PACKET_TYPES_H
+#define NET_PACKET_TYPES_H 1
 
 #include "packet.h"
 #include "handshaking/types.h"

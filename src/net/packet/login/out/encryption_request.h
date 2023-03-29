@@ -1,17 +1,17 @@
-#ifndef PACKET_LOGIN_OUT_ENCRYPTION_REQUEST_H
-#define PACKET_LOGIN_OUT_ENCRYPTION_REQUEST_H
+#ifndef NET_PACKET_LOGIN_OUT_ENCRYPTION_REQUEST_H
+#define NET_PACKET_LOGIN_OUT_ENCRYPTION_REQUEST_H
 
 #include "../../../connection.h"
 
 typedef struct packet_login_out_encryption_request {
     uint8_t *server_id;
     VarInt public_key_length;
-    char *public_key;
+    int8_t *public_key;
     VarInt verify_token_length;
-    char *verify_token;
+    int8_t *verify_token;
 } PacketLoginOutEncryptionRequest;
 
-PacketLoginOutEncryptionRequest *create_encryption_request(VarInt pk_len, char *pk, VarInt vt_len, char *vt);
+PacketLoginOutEncryptionRequest *create_encryption_request(server_t *server);
 
 ReactorPacketPtr pack_encryption_request(PacketLoginOutEncryptionRequest *request);
 

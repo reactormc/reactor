@@ -2,8 +2,8 @@
 #include "names.h"
 #include "types.h"
 
-void handle_handshaking(ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer) {
+void handle_handshaking(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer) {
     if (packet->packet_id == PACKET_HANDSHAKING_IN_HANDSHAKE) {
-        handle_handshake(conn, packet, buffer);
+        handle_handshake(server, conn, packet, buffer);
     }
 }

@@ -1,6 +1,7 @@
 #include "packet.h"
 
 #include "../../util/logger.h"
+#include "../../util/byte_buffer.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -15,6 +16,12 @@ ReactorPacketPtr create_empty_packet(int packet_id) {
 
     ret->packet_length = varint_encoding_length(packet_id);
     ret->packet_id = packet_id;
+
+    if (init_byte_buffer(&ret->data) != BYTE_BUFFER_INIT_SUCCESS) {
+        fprintf(stderr, "create_empty_packet: failed to initialize packet data buffer\n");
+        free(ret);
+        return NULL;
+    }
 
     return ret;
 }
@@ -67,15 +74,14 @@ int create_packet_from_header(byte_buffer_ptr buffer, int compressed, ReactorPac
     packet_length -= varint_encoding_length(packet_id);
     (*packet)->packet_length = packet_length;
 
-    debug("create_packet_from_header: allocating data buf of length %d\n", packet_length);
-    char *data_buf = calloc(packet_length, sizeof(char));
-    if (!data_buf) {
-        perror("create_packet_from_header: data_buf calloc");
+    debug("create_packet_from_header: allocating data buf\n");
+    if (init_byte_buffer(&(*packet)->data) != BYTE_BUFFER_INIT_SUCCESS) {
+        fprintf(stderr, "create_packet_from_header: failed to create byte buffer\n");
         return -1;
     }
 
-    memcpy(data_buf, buffer->next_bytes(buffer), packet_length);
-    (*packet)->data = data_buf;
+    // writes the next packet_length bytes from connection buffer into packet buffer
+    (*packet)->data->write_bytes((*packet)->data, packet_length, (int8_t*) buffer->next_bytes(buffer));
 
     return 0;
 }
@@ -98,7 +104,7 @@ char *encode_packet(ReactorPacketPtr packet) {
     varint_encode(packet->packet_id, buffer + bytes_written, buffer_len - bytes_written, &bytes_tmp);
     bytes_written += bytes_tmp;
 
-    memcpy(buffer + bytes_written, packet->data, packet->packet_length - bytes_tmp);
+    memcpy(buffer + bytes_written, packet->data->bytes, packet->packet_length - bytes_tmp);
 
     return buffer;
 }
@@ -109,7 +115,7 @@ void free_packet(ReactorPacketPtr packet) {
     }
 
     if (packet->data) {
-        free(packet->data);
+        free_byte_buffer(packet->data);
     }
 
     free(packet);

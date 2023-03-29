@@ -23,7 +23,7 @@ PacketHandshakingInHandshake *read_handshake(ReactorPacketPtr parent, byte_buffe
     return child;
 }
 
-void handle_handshake(ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer) {
+void handle_handshake(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer) {
     PacketHandshakingInHandshake *handshake = read_handshake(packet, buffer);
     if (!handshake) {
         perror("handle_handshaking");

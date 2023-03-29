@@ -1,5 +1,5 @@
-#ifndef PACKET_PACKET_H
-#define PACKET_PACKET_H 1
+#ifndef NET_PACKET_PACKET_H
+#define NET_PACKET_PACKET_H 1
 
 #include "../../util/byte_buffer.h"
 #include "../../util/varint.h"
@@ -28,7 +28,7 @@ typedef struct reactor_packet {
      * Uncompressed: Ready to use chunk of data
      * Compressed: zlib compressed packet data
      */
-    char *data;
+    byte_buffer_ptr data;
 } ReactorPacket;
 
 ReactorPacketPtr create_empty_packet(int packet_id);

@@ -3,6 +3,7 @@
 #include "unicode_string.h"
 
 #include <string.h>
+#include <endian.h>
 #include <arpa/inet.h>
 
 const int BYTE_BUFFER_INIT_SUCCESS = 0;
@@ -94,7 +95,7 @@ static int bb_has_more_bytes(byte_buffer_ptr self) {
     return self->is_empty(self) ? 0 : self->remaining_length(self);
 }
 
-static int bb_read(byte_buffer_ptr self, int n_bytes, char out[n_bytes]) {
+static int bb_read(byte_buffer_ptr self, uint8_t n_bytes, int8_t out[n_bytes]) {
     if (self->read_offset + n_bytes > self->buffer_size) {
         return BYTE_BUFFER_READ_OUT_OF_BOUNDS;
     }
@@ -110,8 +111,8 @@ static int bb_read(byte_buffer_ptr self, int n_bytes, char out[n_bytes]) {
     return BYTE_BUFFER_READ_SUCCESS;
 }
 
-static int bb_read_bool(byte_buffer_ptr self, unsigned char *out) {
-    char tmp[1];
+static int bb_read_bool(byte_buffer_ptr self, uint8_t *out) {
+    int8_t tmp[1];
     if (self->read(self, 1, tmp) != BYTE_BUFFER_READ_SUCCESS) {
         return BYTE_BUFFER_READ_FAILURE;
     }
@@ -127,29 +128,52 @@ static int bb_read_bool(byte_buffer_ptr self, unsigned char *out) {
 }
 
 static int bb_read_byte(byte_buffer_ptr self, int8_t *out) {
-    char tmp[1];
+    int8_t tmp[1];
     if (self->read(self, 1, tmp) != BYTE_BUFFER_READ_SUCCESS) {
         return BYTE_BUFFER_READ_FAILURE;
     }
 
     *out = tmp[0];
+
+    return BYTE_BUFFER_READ_SUCCESS;
+}
+
+static int bb_read_bytes(byte_buffer_ptr self, uint8_t n_bytes, int8_t **out) {
+    int8_t tmp[n_bytes];
+    if (self->read(self, n_bytes, tmp) != BYTE_BUFFER_READ_SUCCESS) {
+        return BYTE_BUFFER_READ_FAILURE;
+    }
+
+    memcpy(*out, tmp, n_bytes);
 
     return BYTE_BUFFER_READ_SUCCESS;
 }
 
 static int bb_read_ubyte(byte_buffer_ptr self, uint8_t *out) {
-    char tmp[1];
+    int8_t tmp[1];
     if (self->read(self, 1, tmp) != BYTE_BUFFER_READ_SUCCESS) {
         return BYTE_BUFFER_READ_FAILURE;
     }
 
-    *out = tmp[0];
+    *out = (uint8_t) tmp[0];
 
     return BYTE_BUFFER_READ_SUCCESS;
 }
 
+static int bb_read_ubytes(byte_buffer_ptr self, uint8_t n_bytes, uint8_t **out) {
+    int8_t tmp[n_bytes];
+    if (self->read(self, n_bytes, tmp) != BYTE_BUFFER_READ_SUCCESS) {
+        return BYTE_BUFFER_READ_FAILURE;
+    }
+
+    memcpy(*out, (uint8_t*) tmp, n_bytes);
+
+    return BYTE_BUFFER_READ_SUCCESS;
+}
+
+
 static int bb_read_short(byte_buffer_ptr self, int16_t *out) {
-    char tmp[2];
+    int8_t tmp[2];
     if (self->read(self, 2, tmp) != BYTE_BUFFER_READ_SUCCESS) {
         return BYTE_BUFFER_READ_FAILURE;
     }
@@ -157,27 +181,27 @@ static int bb_read_short(byte_buffer_ptr self, int16_t *out) {
     int8_to_int16 converter;
     memcpy(converter.chars, tmp, 2);
 
-    *out = (int16_t) ntohs(converter.short_value);
+    *out = (int16_t) be16toh(converter.short_value);
 
     return BYTE_BUFFER_READ_SUCCESS;
 }
 
 static int bb_read_ushort(byte_buffer_ptr self, uint16_t *out) {
-    char tmp[2];
+    int8_t tmp[2];
     if (self->read(self, 2, tmp) != BYTE_BUFFER_READ_SUCCESS) {
         return BYTE_BUFFER_READ_FAILURE;
     }
 
     uint8_to_uint16 converter;
-    memcpy(converter.chars, tmp, 2);
+    memcpy(converter.chars, (uint8_t*) tmp, 2);
 
-    *out = (uint16_t) ntohs(converter.short_value);
+    *out = be16toh(converter.short_value);
 
     return BYTE_BUFFER_READ_SUCCESS;
 }
 
 static int bb_read_int(byte_buffer_ptr self, int32_t *out) {
-    char tmp[4];
+    int8_t tmp[4];
     if (self->read(self, 4, tmp) != BYTE_BUFFER_READ_SUCCESS) {
         return BYTE_BUFFER_READ_FAILURE;
     }
@@ -185,13 +209,13 @@ static int bb_read_int(byte_buffer_ptr self, int32_t *out) {
     int8_to_int32 converter;
     memcpy(converter.chars, tmp, 4);
 
-    *out = (int32_t) ntohl(converter.int_value);
+    *out = (int32_t) be32toh(converter.int_value);
 
     return BYTE_BUFFER_READ_SUCCESS;
 }
 
 static int bb_read_long(byte_buffer_ptr self, int64_t *out) {
-    char tmp[8];
+    int8_t tmp[8];
     if (self->read(self, 8, tmp) != BYTE_BUFFER_READ_SUCCESS) {
         return BYTE_BUFFER_READ_FAILURE;
     }
@@ -199,34 +223,36 @@ static int bb_read_long(byte_buffer_ptr self, int64_t *out) {
     int8_to_int64 converter;
     memcpy(converter.chars, tmp, 8);
 
-    *out = (int64_t) ntohl(converter.long_value);
+    *out = (int64_t) be64toh(converter.long_value);
 
     return BYTE_BUFFER_READ_SUCCESS;
 }
 
 static int bb_read_float(byte_buffer_ptr self, float *out) {
-    char tmp[4];
+    int8_t tmp[4];
     if (self->read(self, 4, tmp) != BYTE_BUFFER_READ_SUCCESS) {
         return BYTE_BUFFER_READ_FAILURE;
     }
 
     int8_to_float converter;
     memcpy(converter.chars, tmp, 4);
-    converter.int_value = ntohl(converter.int_value);
+
+    converter.int_value = (int32_t) be32toh(converter.int_value);
     *out = (float) converter.float_value;
 
     return BYTE_BUFFER_READ_SUCCESS;
 }
 
 static int bb_read_double(byte_buffer_ptr self, double *out) {
-    char tmp[8];
+    int8_t tmp[8];
     if (self->read(self, 8, tmp) != BYTE_BUFFER_READ_SUCCESS) {
         return BYTE_BUFFER_READ_FAILURE;
     }
 
     int8_to_double converter;
     memcpy(converter.chars, tmp, 8);
-    converter.long_value = ntohl(converter.long_value);
+
+    converter.long_value = (int64_t) be64toh(converter.long_value);
     *out = (double) converter.double_value;
 
     return BYTE_BUFFER_READ_SUCCESS;
@@ -271,7 +297,7 @@ static int bb_read_string(byte_buffer_ptr self, int max_length, uint8_t **out) {
 
             uint8_t *tmp = realloc(out, buffer_len);
             if (!tmp) {
-                free(out);
+                free(*out);
                 *out = NULL;
                 self->roll_back(self, total_read);
                 return BYTE_BUFFER_READ_FAILURE;
@@ -319,14 +345,15 @@ static int bb_read_varint(byte_buffer_ptr self, VarInt *out) {
 }
 
 static int bb_read_uuid(byte_buffer_ptr self, uuid_t *out) {
-    char tmp[16];
+    int8_t tmp[16];
     if (self->read(self, 16, tmp) != BYTE_BUFFER_READ_SUCCESS) {
         return BYTE_BUFFER_READ_FAILURE;
     }
 
     uuid_t uuid;
-    memcpy(uuid.bit, tmp, 16);
+    memcpy(uuid.bit, (uint8_t*) tmp, 16);
 
+    // TODO: be64toh?
     uint64_t msb = uuid.word[0];
     uint64_t lsb = uuid.word[1];
 
@@ -338,12 +365,12 @@ static int bb_read_uuid(byte_buffer_ptr self, uuid_t *out) {
     return BYTE_BUFFER_READ_SUCCESS;
 }
 
-static int bb_write0(byte_buffer_ptr self, char *bytes, int n_bytes, int been_here_before) {
+static int bb_write0(byte_buffer_ptr self, uint8_t n_bytes, int8_t *bytes, int been_here_before) {
     if (self->write_offset + n_bytes > self->buffer_capacity) {
         if (self->grow(self) != BYTE_BUFFER_GROW_SUCCESS) {
             if (!been_here_before) {
                 self->reroll(self);
-                return bb_write0(self, bytes, n_bytes, 1);
+                return bb_write0(self, n_bytes, bytes, 1);
             } else {
                 return BYTE_BUFFER_WRITE_FAILURE;
             }
@@ -358,73 +385,81 @@ static int bb_write0(byte_buffer_ptr self, char *bytes, int n_bytes, int been_he
     return BYTE_BUFFER_WRITE_SUCCESS;
 }
 
-static int bb_write(byte_buffer_ptr self, char *bytes, int n_bytes) {
-    return bb_write0(self, bytes, n_bytes, 0);
+static int bb_write(byte_buffer_ptr self, uint8_t n_bytes, int8_t *bytes) {
+    return bb_write0(self, n_bytes, bytes, 0);
 }
 
 static int bb_write_bool(byte_buffer_ptr self, unsigned char in) {
-    char tmp[1];
+    int8_t tmp[1];
     if (in == 0) {
         tmp[0] = 0;
     } else {
         tmp[0] = 1;
     }
 
-    return self->write(self, tmp, 1);
+    return self->write(self, 1, tmp);
 }
 
 static int bb_write_byte(byte_buffer_ptr self, int8_t in) {
-    char tmp[1] = {in};
-    return self->write(self, tmp, 1);
+    int8_t tmp[1] = {in};
+    return self->write(self, 1, tmp);
+}
+
+static int bb_write_bytes(byte_buffer_ptr self, uint8_t n_bytes, int8_t *in) {
+    return self->write(self, n_bytes, in);
 }
 
 static int bb_write_ubyte(byte_buffer_ptr self, uint8_t in) {
-    char tmp[1] = {in};
-    return self->write(self, tmp, 1);
+    uint8_t tmp[1] = {in};
+    return self->write(self, 1, (int8_t*) tmp);
+}
+
+static int bb_write_ubytes(byte_buffer_ptr self, uint8_t n_bytes, uint8_t *in) {
+    return self->write(self, n_bytes, (int8_t*) in);
 }
 
 static int bb_write_short(byte_buffer_ptr self, int16_t in) {
     int8_to_int16 converter;
-    converter.short_value = htons(in);
+    converter.short_value = (int16_t) htobe16(in);
 
-    return self->write(self, (char *) converter.chars, 2);
+    return self->write(self, 2, converter.chars);
 }
 
 static int bb_write_ushort(byte_buffer_ptr self, uint16_t in) {
     uint8_to_uint16 converter;
-    converter.short_value = htons(in);
+    converter.short_value = htobe16(in);
 
-    return self->write(self, (char *) converter.chars, 2);
+    return self->write(self, 2, (int8_t*) converter.chars);
 }
 
 static int bb_write_int(byte_buffer_ptr self, int32_t in) {
     int8_to_int32 converter;
-    converter.int_value = htonl(in);
+    converter.int_value = (int32_t) htobe32(in);
 
-    return self->write(self, (char *) converter.chars, 4);
+    return self->write(self, 4, converter.chars);
 }
 
 static int bb_write_long(byte_buffer_ptr self, int64_t in) {
-    int8_to_int32 converter;
-    converter.int_value = htonl(in);
+    int8_to_int64 converter;
+    converter.long_value = (int64_t) htobe64(in);
 
-    return self->write(self, (char *) converter.chars, 8);
+    return self->write(self, 8, converter.chars);
 }
 
 static int bb_write_float(byte_buffer_ptr self, float in) {
     int8_to_float converter;
     converter.float_value = in;
-    converter.int_value = htonl(converter.int_value);
+    converter.int_value = (int32_t) htobe32(converter.int_value);
 
-    return self->write(self, (char *) converter.chars, 4);
+    return self->write(self, 4, converter.chars);
 }
 
 static int bb_write_double(byte_buffer_ptr self, double in) {
     int8_to_double converter;
     converter.double_value = in;
-    converter.long_value = htonl(converter.long_value);
+    converter.long_value = (int64_t) htobe64(converter.long_value);
 
-    return self->write(self, (char *) converter.chars, 4);
+    return self->write(self, 8, converter.chars);
 }
 
 static int bb_write_nt_string(byte_buffer_ptr self, int max_length, uint8_t *in) {
@@ -450,7 +485,7 @@ static int bb_write_lp_string(byte_buffer_ptr self, int length, int max_length, 
         return BYTE_BUFFER_WRITE_FAILURE;
     }
 
-    return self->write(self, (char *) in, length);
+    return self->write(self, length, (int8_t*) in);
 }
 
 static int bb_write_nt_chat(byte_buffer_ptr self, uint8_t *in) {
@@ -490,10 +525,11 @@ static int bb_write_uuid(byte_buffer_ptr self, uuid_t uuid) {
     uint64_t lsb = htonl(uuid.word[0]);
     uint64_t msb = htonl(uuid.word[1]);
 
+    // TODO: htobe64?
     uuid.word[0] = msb;
     uuid.word[1] = lsb;
 
-    return self->write(self, uuid.bit, 16);
+    return self->write(self, 16, (int8_t*) uuid.bit);
 }
 
 int init_byte_buffer(byte_buffer_t **buf) {
@@ -533,7 +569,9 @@ int init_byte_buffer(byte_buffer_t **buf) {
     (*buf)->read = &bb_read;
     (*buf)->read_bool = &bb_read_bool;
     (*buf)->read_byte = &bb_read_byte;
+    (*buf)->read_bytes = &bb_read_bytes;
     (*buf)->read_ubyte = &bb_read_ubyte;
+    (*buf)->read_ubytes = &bb_read_ubytes;
     (*buf)->read_short = &bb_read_short;
     (*buf)->read_ushort = &bb_read_ushort;
     (*buf)->read_int = &bb_read_int;
@@ -550,7 +588,9 @@ int init_byte_buffer(byte_buffer_t **buf) {
     (*buf)->write = &bb_write;
     (*buf)->write_bool = &bb_write_bool;
     (*buf)->write_byte = &bb_write_byte;
+    (*buf)->write_bytes = &bb_write_bytes;
     (*buf)->write_ubyte = &bb_write_ubyte;
+    (*buf)->write_ubytes = &bb_write_ubytes;
     (*buf)->write_short = &bb_write_short;
     (*buf)->write_ushort = &bb_write_ushort;
     (*buf)->write_int = &bb_write_int;

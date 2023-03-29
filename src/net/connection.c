@@ -4,7 +4,40 @@
 #include <sys/socket.h>
 #include "connection.h"
 #include "packet/packet_handler.h"
+#include "../util/unicode_string.h"
 #include "../util/logger.h"
+
+static int set_profile_id(ConnectionPtr self, uint8_t *profile_id) {
+    size_t len = u8_strlen(profile_id);
+
+    if (!self->profile_id) {
+        self->profile_id = calloc(len + 1, sizeof(uint8_t));
+        if (!self->profile_id) {
+            return -1;
+        }
+    }
+
+    u8_strncpy(self->profile_id, profile_id, len);
+
+    return 0;
+}
+
+static int set_username(ConnectionPtr self, uint8_t *username) {
+    if (!self->username) {
+        self->username = calloc(16, sizeof(ucs4_t));
+        if (!self->username) {
+            return -1;
+        }
+    }
+
+    u8_strncpy(self->username, username, 16);
+    return 0;
+}
+
+static int set_unique_id(ConnectionPtr self, uuid_t unique_id) {
+    self->unique_id = unique_id;
+    return 0;
+}
 
 /**
  * Receives data from the given socket and writes it into the given byte buffer.
@@ -22,7 +55,7 @@ static int poll_network(int remote_fd, byte_buffer_ptr buffer) {
     }
 
     if (bytes_read > 0) {
-        buffer->write(buffer, tmp, bytes_read);
+        buffer->write(buffer, bytes_read, tmp);
     }
 
     return bytes_read;
@@ -34,7 +67,7 @@ static int poll_network(int remote_fd, byte_buffer_ptr buffer) {
  * 3. read one packet and then some of another
  * @param remote_fd
  */
-void handle_connection(int remote_fd) {
+void handle_connection(server_t *server, int remote_fd) {
     printf("handle_connection: client connected\n");
 
     ConnectionPtr conn = calloc(1, sizeof(Connection));
@@ -45,6 +78,10 @@ void handle_connection(int remote_fd) {
 
     conn->remote_fd = remote_fd;
     conn->state = STATE_HANDSHAKING;
+    conn->is_encrypted = 0;
+    conn->set_profile_id = &set_profile_id;
+    conn->set_username = &set_username;
+    conn->set_unique_id = &set_unique_id;
 
     byte_buffer_ptr buffer;
     if (init_byte_buffer(&buffer) != BYTE_BUFFER_INIT_SUCCESS) {
@@ -87,7 +124,7 @@ void handle_connection(int remote_fd) {
                 exit(EXIT_FAILURE);
             case 0:
                 debug("handle_connection: handling packet\n");
-                handle_packet(conn, packet, buffer);
+                handle_packet(server, conn, packet, buffer);
                 free_packet(packet);
                 continue;
             default:

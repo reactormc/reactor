@@ -1,5 +1,5 @@
-#ifndef PACKET_LOGIN_OUT_TYPES_H
-#define PACKET_LOGIN_OUT_TYPES_H 1
+#ifndef NET_PACKET_LOGIN_OUT_TYPES_H
+#define NET_PACKET_LOGIN_OUT_TYPES_H 1
 
 #include "disconnect.h"
 #include "encryption_request.h"

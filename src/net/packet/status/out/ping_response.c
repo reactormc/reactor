@@ -3,7 +3,6 @@
 #include "../../packet_handler.h"
 
 #include <stdlib.h>
-#include <arpa/inet.h>
 
 PacketStatusOutPingResponse *create_ping_response(uint64_t response) {
     PacketStatusOutPingResponse *packet = calloc(1, sizeof(PacketStatusOutStatusResponse));
@@ -23,8 +22,8 @@ ReactorPacketPtr pack_ping_response(PacketStatusOutPingResponse *response) {
 
     packet->packet_length += 8;
 
-    response->payload = htonl(response->payload);
-    packet->data = (char *) &response->payload;
+    response->payload = htobe64(response->payload);
+    packet->data->write_bytes(packet->data, 8, (int8_t*) &response->payload);
 
     return packet;
 }

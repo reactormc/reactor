@@ -59,13 +59,17 @@ typedef struct byte_buffer_t {
     int (*has_more_bytes)(byte_buffer_ptr self);
 
     /* reading */
-    int (*read)(byte_buffer_ptr self, int n_bytes, char *out);
+    int (*read)(byte_buffer_ptr self, uint8_t n_bytes, int8_t *out);
 
     int (*read_bool)(byte_buffer_ptr self, unsigned char *out);
 
     int (*read_byte)(byte_buffer_ptr self, int8_t *out);
 
+    int (*read_bytes)(byte_buffer_ptr self, uint8_t n_bytes, int8_t **out);
+
     int (*read_ubyte)(byte_buffer_ptr self, uint8_t *out);
+
+    int (*read_ubytes)(byte_buffer_ptr self, uint8_t n_bytes, uint8_t **out);
 
     int (*read_short)(byte_buffer_ptr self, int16_t *out);
 
@@ -90,13 +94,17 @@ typedef struct byte_buffer_t {
     int (*read_uuid)(byte_buffer_ptr self, uuid_t *out);
 
     /* writing */
-    int (*write)(byte_buffer_ptr self, char *bytes, int n_bytes);
+    int (*write)(byte_buffer_ptr self, uint8_t n_bytes, int8_t *bytes);
 
     int (*write_bool)(byte_buffer_ptr self, unsigned char in);
 
     int (*write_byte)(byte_buffer_ptr self, int8_t in);
 
+    int (*write_bytes)(byte_buffer_ptr self, uint8_t n_bytes, int8_t *in);
+
     int (*write_ubyte)(byte_buffer_ptr self, uint8_t in);
+
+    int (*write_ubytes)(byte_buffer_ptr self, uint8_t n_bytes, uint8_t *in);
 
     int (*write_short)(byte_buffer_ptr self, int16_t in);
 
@@ -142,20 +150,10 @@ typedef union int8_to_int32 {
     int32_t int_value;
 } int8_to_int32;
 
-typedef union uint8_to_uint32 {
-    uint8_t chars[4];
-    uint32_t int_value;
-} uint8_to_uint32;
-
 typedef union int8_to_int64 {
     int8_t chars[8];
     int64_t long_value;
 } int8_to_int64;
-
-typedef union uint8_to_uint64 {
-    uint8_t chars[8];
-    uint64_t long_value;
-} uint8_to_uint64;
 
 typedef union int8_to_float {
     int8_t chars[4];

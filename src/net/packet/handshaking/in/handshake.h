@@ -1,5 +1,5 @@
-#ifndef PACKET_HANDSHAKING_IN_HANDSHAKE_H
-#define PACKET_HANDSHAKING_IN_HANDSHAKE_H
+#ifndef NET_PACKET_HANDSHAKING_IN_HANDSHAKE_H
+#define NET_PACKET_HANDSHAKING_IN_HANDSHAKE_H
 
 #include "../../../connection.h"
 #include "../../../../util/unicode_string.h"
@@ -14,6 +14,6 @@ typedef struct packet_handshaking_in_handshake {
 
 PacketHandshakingInHandshake *read_handshake(ReactorPacketPtr parent, byte_buffer_ptr buffer);
 
-void handle_handshake(ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
+void handle_handshake(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
 
 #endif

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int uuid_to_string(uuid_t *uuid, char **out) {
+int uuid_to_string(uuid_t *uuid, char **out, uint8_t dashed) {
     static const char hex[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
     static const int groups[] = { 8, 4, 4, 4, 12 };
 
@@ -22,11 +22,24 @@ int uuid_to_string(uuid_t *uuid, char **out) {
             **out++ = hex[byte & 0xf];
         }
 
-        **out++ = '-';
+        if (dashed == 1) {
+            **out++ = '-';
+        }
     }
 
-    out--;
+    if (dashed == 1) {
+        out--;
+    }
+
     **out = '\0';
 
     return 0;
+}
+
+int uuid_to_dashed_string(uuid_t *uuid, char **out) {
+    return uuid_to_string(uuid, out, 1);
+}
+
+int uuid_to_dashless_string(uuid_t *uuid, char** out) {
+    return uuid_to_string(uuid, out, 0);
 }

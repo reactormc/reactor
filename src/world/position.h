@@ -1,5 +1,5 @@
-#ifndef POSITION_H
-#define POSITION_H 1
+#ifndef WORLD_POSITION_H
+#define WORLD_POSITION_H 1
 
 typedef struct position_t {
     int x;
