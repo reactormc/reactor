@@ -9,16 +9,14 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-#include <tommath.h>
-
 static void server_generate_rsa_keypair(server_t *server) {
+    ltc_mp = ltm_desc;
+
     debug("server_generate_rsa_keypair: registering prng...\n");
     if (register_prng(&sprng_desc) == -1) {
         fprintf(stderr, "reactor: failed to register SPRNG\n");
         exit(EXIT_FAILURE);
     }
-
-    // TODO: here, set math lib descriptor ?
 
     debug("server_generate_rsa_keypair: generating 1024-bit rsa key...\n");
     rsa_key key;
@@ -27,10 +25,14 @@ static void server_generate_rsa_keypair(server_t *server) {
         fprintf(stderr, "reactor: failed to create rsa keypair: %s\n", error_to_string(err));
     }
 
+    debug("server_generate_rsa_keypair: key generated.\n");
+    server->rsa_key = key;
+
     debug("server_generate_rsa_keypair: extracting X.509 public key...\n");
-    unsigned long key_size = 1024;
-    unsigned char exported_key[key_size];
-    if (rsa_export(exported_key, &key_size, PK_STD | PK_PUBLIC, &server->rsa_key) != 0) {
+    uint64_t key_size = 1024;
+    uint8_t exported_key[key_size];
+    memset(exported_key, 0, key_size);
+    if (rsa_export(exported_key, &key_size, PK_STD | PK_PUBLIC, &server->rsa_key) != CRYPT_OK) {
         fprintf(stderr, "reactor: failed to export rsa public key\n");
         exit(EXIT_FAILURE);
     }

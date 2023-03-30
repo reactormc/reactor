@@ -86,27 +86,18 @@ int create_packet_from_header(byte_buffer_ptr buffer, int compressed, ReactorPac
     return 0;
 }
 
-char *encode_packet(ReactorPacketPtr packet) {
-    int buffer_len = (int) packet->packet_length + varint_encoding_length(packet->packet_length);
-
-    char *buffer = calloc(buffer_len, sizeof(char));
-    if (!buffer) {
-        perror("encode_packet - calloc");
+byte_buffer_ptr encode_packet(ReactorPacketPtr packet) {
+    byte_buffer_ptr encode_buffer;
+    if (init_byte_buffer(&encode_buffer) != BYTE_BUFFER_INIT_SUCCESS) {
+        fprintf(stderr, "Failed to initialize packet encoding byte buffer\n");
         return NULL;
     }
 
-    unsigned char bytes_tmp = 0;
-    int bytes_written = 0;
+    encode_buffer->write_varint(encode_buffer, packet->packet_length);
+    encode_buffer->write_varint(encode_buffer, packet->packet_id);
+    encode_buffer->write_bytes(encode_buffer, packet->packet_length, (int8_t*) packet->data->bytes);
 
-    varint_encode(packet->packet_length, buffer, buffer_len, &bytes_tmp);
-    bytes_written += bytes_tmp;
-
-    varint_encode(packet->packet_id, buffer + bytes_written, buffer_len - bytes_written, &bytes_tmp);
-    bytes_written += bytes_tmp;
-
-    memcpy(buffer + bytes_written, packet->data->bytes, packet->packet_length - bytes_tmp);
-
-    return buffer;
+    return encode_buffer;
 }
 
 void free_packet(ReactorPacketPtr packet) {

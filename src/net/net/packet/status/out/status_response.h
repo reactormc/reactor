@@ -5,9 +5,10 @@
 
 typedef struct packet_status_out_status_response {
     uint8_t *response;
+    uint8_t response_len;
 } PacketStatusOutStatusResponse;
 
-PacketStatusOutStatusResponse *create_status_response(uint8_t *response);
+PacketStatusOutStatusResponse *create_status_response(char *json_response);
 
 ReactorPacketPtr pack_status_response(PacketStatusOutStatusResponse *response);
 

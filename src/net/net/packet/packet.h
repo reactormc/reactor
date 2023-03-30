@@ -35,7 +35,7 @@ ReactorPacketPtr create_empty_packet(int packet_id);
 
 int create_packet_from_header(byte_buffer_ptr buffer, int compressed, ReactorPacketPtr *packet);
 
-char *encode_packet(ReactorPacketPtr packet);
+byte_buffer_ptr encode_packet(ReactorPacketPtr packet);
 
 void free_packet(ReactorPacketPtr packet);
 

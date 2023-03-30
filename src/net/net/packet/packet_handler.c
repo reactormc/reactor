@@ -22,7 +22,7 @@ void handle_packet(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet
 }
 
 int send_packet(ConnectionPtr conn, ReactorPacketPtr packet) {
-    char *encoded = encode_packet(packet);
+    byte_buffer_ptr encoded = encode_packet(packet);
     if (!encoded) {
         return -1;
     }
@@ -31,11 +31,11 @@ int send_packet(ConnectionPtr conn, ReactorPacketPtr packet) {
 
     debug("send_packet: sending packet, size %d\n", total_size);
 
-    ssize_t total_bytes_sent = 0;
+    int total_bytes_sent = 0;
 
     while (1) {
         debug("send_packet: calling send()\n");
-        ssize_t bytes_sent = send(conn->remote_fd, encoded + total_bytes_sent, total_size - total_bytes_sent, 0);
+        ssize_t bytes_sent = send(conn->remote_fd, encoded->bytes_at(encoded, total_bytes_sent), total_size - total_bytes_sent, 0);
 
         if (bytes_sent == -1) {
             perror("send_packet: send");
@@ -43,7 +43,7 @@ int send_packet(ConnectionPtr conn, ReactorPacketPtr packet) {
         } else {
             debug("send_packet: sent %d bytes, recording...\n", bytes_sent);
 
-            total_bytes_sent += bytes_sent;
+            total_bytes_sent += (int) bytes_sent;
 
             if (total_bytes_sent >= total_size) {
                 debug("send_packet: no more tries required\n");
@@ -53,6 +53,7 @@ int send_packet(ConnectionPtr conn, ReactorPacketPtr packet) {
     }
 
     debug("send_packet: sent %d byte packet\n", total_bytes_sent);
+    free_byte_buffer(encoded);
     free_packet(packet);
     return 0;
 }

@@ -147,6 +147,7 @@ void handle_encryption_response(server_t *server, ConnectionPtr conn, ReactorPac
     }
 
     // TODO: set profile id & name & maybe skin blob?
+    debug("handle_encryption_response: successfully parsed encryption response, next set compression...\n");
 
     curl_easy_cleanup(curl);
     free_byte_buffer(session_resp_buffer);

@@ -353,9 +353,8 @@ static int bb_read_uuid(byte_buffer_ptr self, uuid_t *out) {
     uuid_t uuid;
     memcpy(uuid.bit, (uint8_t*) tmp, 16);
 
-    // TODO: be64toh?
-    uint64_t msb = uuid.word[0];
-    uint64_t lsb = uuid.word[1];
+    uint64_t msb = be64toh(uuid.word[0]);
+    uint64_t lsb = be64toh(uuid.word[1]);
 
     uuid.word[0] = lsb;
     uuid.word[1] = msb;
@@ -522,10 +521,9 @@ static int bb_write_varint(byte_buffer_ptr self, VarInt in) {
 }
 
 static int bb_write_uuid(byte_buffer_ptr self, uuid_t uuid) {
-    uint64_t lsb = htonl(uuid.word[0]);
-    uint64_t msb = htonl(uuid.word[1]);
+    uint64_t lsb = htobe64(uuid.word[0]);
+    uint64_t msb = htobe64(uuid.word[1]);
 
-    // TODO: htobe64?
     uuid.word[0] = msb;
     uuid.word[1] = lsb;
 

@@ -12,6 +12,9 @@ endif()
 
 # Get zlib
 find_package(ZLIB)
+if (NOT ZLIB_FOUND)
+    message(FATAL_ERROR "zlib not found")
+endif()
 
 # Get libtomcrypt
 find_library(TOMCRYPT_LIB tomcrypt)
@@ -36,13 +39,16 @@ file(GLOB_RECURSE SOURCES LIST_DIRECTORIES false ./*.c ./*.h)
 
 # Set libraries
 set(REACTOR_MODULES REACTOR_NET REACTOR_UTIL REACTOR_WORLD)
-set(REACTOR_LIBS ${REACTOR_MODULES} ${UNISTRING_LIB} ${JSONC_LIB} ZLIB::ZLIB ${TOMCRYPT_LIB} ${TOMMATH_LIB} ${CURL_LIBRARIES})
+set(REACTOR_LIBS
+        ${REACTOR_MODULES} ${UNISTRING_LIB} ${JSONC_LIB} ZLIB::ZLIB ${TOMCRYPT_LIB} ${TOMMATH_LIB}
+        ${CURL_LIBRARIES})
 
 # Release build
 add_executable(reactor ${SOURCES})
+target_compile_definitions(reactor PUBLIC LTM_DESC USE_LTM)
 target_link_libraries(reactor ${REACTOR_LIBS})
 
 # Debug build
 add_executable(reactor_debug ${SOURCES})
-target_compile_definitions(reactor_debug PUBLIC DEBUG)
+target_compile_definitions(reactor_debug PUBLIC LTM_DESC USE_LTM DEBUG)
 target_link_libraries(reactor_debug ${REACTOR_LIBS})

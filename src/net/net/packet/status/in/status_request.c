@@ -1,7 +1,6 @@
 #include "status_request.h"
 #include "net/packet/status/out/status_response.h"
 #include "util/logger.h"
-#include "util/unicode_string.h"
 
 #include <json-c/json.h>
 
@@ -60,10 +59,9 @@ void handle_status_request(server_t *server, ConnectionPtr conn, ReactorPacketPt
     /* }}}2 */
 
     const char *data = json_object_to_json_string(response);
-    uint8_t *out = encode_ntls_to_lpus(data, 32767); // max length of json response
 
     /* dispose object */
     json_object_put(response);
 
-    send_status_response(conn, create_status_response(out));
+    send_status_response(conn, create_status_response(data));
 }
