@@ -28,11 +28,11 @@ ReactorPacketPtr pack_ping_response(PacketStatusOutPingResponse *response) {
     return packet;
 }
 
-int send_ping_response(ConnectionPtr connection, PacketStatusOutPingResponse *response) {
+int send_ping_response(connection_t *conn, PacketStatusOutPingResponse *response) {
     ReactorPacketPtr packed = pack_ping_response(response);
     if (!packed) {
         return -1;
     }
 
-    send_packet(connection, packed);
+    send_packet(conn, packed);
 }

@@ -3,6 +3,6 @@
 
 #include "net/connection.h"
 
-void handle_login_plugin_response(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
+void handle_login_plugin_response(connection_t *conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
 
 #endif

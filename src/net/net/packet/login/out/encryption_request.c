@@ -52,13 +52,13 @@ ReactorPacketPtr pack_encryption_request(PacketLoginOutEncryptionRequest *reques
     return packet;
 }
 
-int send_encryption_request(ConnectionPtr connection, PacketLoginOutEncryptionRequest *request) {
+int send_encryption_request(connection_t *conn, PacketLoginOutEncryptionRequest *request) {
     ReactorPacketPtr packed = pack_encryption_request(request);
     if (!packed) {
         return -1;
     }
 
-    send_packet(connection, packed);
+    send_packet(conn, packed);
 
     return 0;
 }

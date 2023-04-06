@@ -32,7 +32,7 @@ static size_t session_write_callback(char *ptr, size_t size, size_t nmemb, void 
     return 0;
 }
 
-void handle_encryption_response(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer) {
+void handle_encryption_response(connection_t *conn, ReactorPacketPtr packet, byte_buffer_ptr buffer) {
     debug("handle_encryption_response: got encryption response packet\n");
 
     PacketLoginInEncryptionResponse *encryption_response = read_encryption_response(packet, buffer);
@@ -55,7 +55,7 @@ void handle_encryption_response(server_t *server, ConnectionPtr conn, ReactorPac
             0,
             0,
             &decrypt_status,
-            &server->rsa_key
+            &conn->server->rsa_key
     );
 
     if (decrypt_status == 0) {
@@ -85,9 +85,9 @@ void handle_encryption_response(server_t *server, ConnectionPtr conn, ReactorPac
         exit(EXIT_FAILURE);
     }
 
-    SHA1Update(sha1_ctx, server->server_id, u8_strlen(server->server_id));
+    SHA1Update(sha1_ctx, conn->server->server_id, u8_strlen(conn->server->server_id));
     SHA1Update(sha1_ctx, (uint8_t*) decrypted_shared_secret, encryption_response->shared_secret_length);
-    SHA1Update(sha1_ctx, (uint8_t*) server->public_key_x509, server->public_key_x509_len);
+    SHA1Update(sha1_ctx, (uint8_t*) conn->server->public_key_x509, conn->server->public_key_x509_len);
 
     uint8_t *sha1_digest = NULL;
     SHA1Final(sha1_digest, sha1_ctx);

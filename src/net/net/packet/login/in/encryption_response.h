@@ -10,6 +10,6 @@ typedef struct packet_login_in_encryption_response {
     int8_t *verify_token;
 } PacketLoginInEncryptionResponse;
 
-void handle_encryption_response(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
+void handle_encryption_response(connection_t *conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
 
 #endif

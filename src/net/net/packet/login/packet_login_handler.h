@@ -5,6 +5,6 @@
 #include "types.h"
 #include "names.h"
 
-void handle_login(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
+void handle_login(connection_t *conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
 
 #endif

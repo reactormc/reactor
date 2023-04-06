@@ -58,39 +58,46 @@ static void *get_in_addr(struct sockaddr *addr) {
     return &(((struct sockaddr_in6 *) addr)->sin6_addr);
 }
 
-static void server_start_connection_loop(server_t *server, int server_socket_fd) {
-    while (1) {
-        struct sockaddr_storage their_addr;
-        socklen_t sin_size = sizeof(their_addr);
+static void accept_connection(server_t *server) {
+    struct sockaddr_storage their_addr;
+    socklen_t sin_size = sizeof(their_addr);
 
-        int remote_fd = accept(server_socket_fd, (struct sockaddr *) &their_addr,
-                               &sin_size);
+    int remote_fd = accept(server->socket_fd, (struct sockaddr *) &their_addr,
+                           &sin_size);
 
-        if (remote_fd == -1) {
-            perror("accept");
-            continue;
-        }
-
-        char s[INET6_ADDRSTRLEN];
-        inet_ntop(their_addr.ss_family,
-                  get_in_addr((struct sockaddr *) &their_addr), s, sizeof(s));
-
-        printf("reactor: got connection from %s\n", s);
-
-        int fork_status;
-        if ((fork_status = fork()) == -1) {
-            perror("reactor: fork");
-            exit(1);
-        }
-
-        if (fork_status == 0) {
-            close(server_socket_fd);
-            printf("reactor: starting child process to manage connection\n");
-            handle_connection(server, remote_fd);
-        } else {
-            close(remote_fd);
-        }
+    if (remote_fd == -1) {
+        perror("accept");
+        return;
     }
+
+    char s[INET6_ADDRSTRLEN];
+    inet_ntop(their_addr.ss_family,
+              get_in_addr((struct sockaddr *) &their_addr), s, sizeof(s));
+
+    printf("reactor: got connection from %s\n", s);
+
+    connection_t *conn = calloc(1, sizeof(connection_t));
+    if (!conn) {
+        fprintf(stderr, "reactor: failed to allocate connection in heap\n");
+        return;
+    }
+
+    conn->server = server;
+    conn->remote_fd = remote_fd;
+
+    pthread_t packet_handler_thread;
+    pthread_create(&packet_handler_thread, NULL, handle_connection, conn);
+}
+
+static void *tick_loop(void *arg) {
+    server_t *server = (server_t*) arg;
+
+    printf("reactor: waiting for connections...\n");
+    while (server->shutdown == 0) {
+        accept_connection(server);
+    }
+
+    return NULL;
 }
 
 server_t *start_server(uint8_t *server_id, int server_socket_fd) {
@@ -101,6 +108,9 @@ server_t *start_server(uint8_t *server_id, int server_socket_fd) {
         fprintf(stderr, "reactor: failed to allocate space for server struct\n");
         return NULL;
     }
+
+    server->socket_fd = server_socket_fd;
+    server->shutdown = 0;
 
     server->server_id = calloc(20, sizeof(ucs4_t));
     if (!server->server_id) {
@@ -114,6 +124,10 @@ server_t *start_server(uint8_t *server_id, int server_socket_fd) {
     printf("reactor: generating rsa keypair...\n");
     server_generate_rsa_keypair(server);
 
-    printf("reactor: waiting for connections...\n");
-    server_start_connection_loop(server, server_socket_fd);
+    printf("reactor: starting server tick loop\n");
+    pthread_t server_tick_loop;
+    pthread_create(&server_tick_loop, NULL, tick_loop, server);
+    pthread_join(server_tick_loop, NULL);
+
+    return NULL;
 }

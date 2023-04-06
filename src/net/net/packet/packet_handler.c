@@ -2,21 +2,21 @@
 #include "util/logger.h"
 #include <sys/socket.h>
 
-void handle_packet(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer) {
+void handle_packet(connection_t *conn, ReactorPacketPtr packet, byte_buffer_ptr buffer) {
     debug("handle_packet: state: %d, packet id: %llu\n", conn->state, packet->packet_id);
 
     switch (conn->state) {
         case STATE_HANDSHAKING:
-            handle_handshaking(server, conn, packet, buffer);
+            handle_handshaking(conn, packet, buffer);
             break;
         case STATE_STATUS:
-            handle_status(server, conn, packet, buffer);
+            handle_status(conn, packet, buffer);
             break;
         case STATE_LOGIN:
-            handle_login(server, conn, packet, buffer);
+            handle_login(conn, packet, buffer);
             break;
         case STATE_PLAY:
-            handle_play(server, conn, packet, buffer);
+            handle_play(conn, packet, buffer);
             break;
     }
 }

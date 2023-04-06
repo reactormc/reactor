@@ -4,7 +4,7 @@
 
 #include <json-c/json.h>
 
-void handle_status_request(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer) {
+void handle_status_request(connection_t *conn, ReactorPacketPtr packet, byte_buffer_ptr buffer) {
     debug("handle_status_request: creating json status response\n");
 
     /* json response building {{{2 */
@@ -63,5 +63,5 @@ void handle_status_request(server_t *server, ConnectionPtr conn, ReactorPacketPt
     /* dispose object */
     json_object_put(response);
 
-    send_status_response(conn, create_status_response(data));
+    send_status_response(conn, create_status_response((char*) data));
 }

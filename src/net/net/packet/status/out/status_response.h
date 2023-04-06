@@ -12,6 +12,6 @@ PacketStatusOutStatusResponse *create_status_response(char *json_response);
 
 ReactorPacketPtr pack_status_response(PacketStatusOutStatusResponse *response);
 
-int send_status_response(ConnectionPtr connection, PacketStatusOutStatusResponse *response);
+int send_status_response(connection_t *conn, PacketStatusOutStatusResponse *response);
 
 #endif

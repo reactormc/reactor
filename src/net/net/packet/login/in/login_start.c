@@ -30,7 +30,7 @@ PacketLoginInLoginStart *read_login_start(ReactorPacketPtr parent, byte_buffer_p
     return child;
 }
 
-void handle_login_start(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer) {
+void handle_login_start(connection_t *conn, ReactorPacketPtr packet, byte_buffer_ptr buffer) {
     debug("handle_login: got login start packet\n");
 
     PacketLoginInLoginStart *login_start = read_login_start(packet, buffer);
@@ -47,7 +47,7 @@ void handle_login_start(server_t *server, ConnectionPtr conn, ReactorPacketPtr p
     }
 
     printf("reactor: received login start, sending encryption request\n");
-    send_encryption_request(conn, create_encryption_request(server));
+    send_encryption_request(conn, create_encryption_request(conn->server));
 
     free(login_start);
 }

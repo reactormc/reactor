@@ -11,9 +11,11 @@
 #define STATE_LOGIN 2
 #define STATE_PLAY 3
 
-typedef struct connection *ConnectionPtr;
-typedef struct connection {
+typedef struct connection_t *ConnectionPtr;
+typedef struct connection_t {
+    server_t *server;
     int remote_fd;
+
     uint8_t state;
     uint8_t is_encrypted;
 
@@ -26,9 +28,9 @@ typedef struct connection {
     int (*set_profile_id)(ConnectionPtr self, uint8_t *profile_id);
     int (*set_username)(ConnectionPtr self, uint8_t *username);
     int (*set_unique_id)(ConnectionPtr self, uuid_t unique_id);
-} Connection;
+} connection_t;
 
 
-void handle_connection(server_t *server, int remote_fd);
+void *handle_connection(void *arg);
 
 #endif

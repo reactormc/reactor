@@ -3,6 +3,6 @@
 
 #include "net/connection.h"
 
-void handle_status_request(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
+void handle_status_request(connection_t *conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
 
 #endif

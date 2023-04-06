@@ -10,6 +10,6 @@ typedef struct packet_status_in_ping_request {
 
 PacketStatusInPingRequest *read_ping_request(ReactorPacketPtr parent, byte_buffer_ptr buffer);
 
-void handle_ping_request(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
+void handle_ping_request(connection_t *conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
 
 #endif

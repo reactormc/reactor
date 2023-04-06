@@ -15,6 +15,6 @@ PacketLoginOutEncryptionRequest *create_encryption_request(server_t *server);
 
 ReactorPacketPtr pack_encryption_request(PacketLoginOutEncryptionRequest *request);
 
-int send_encryption_request(ConnectionPtr connection, PacketLoginOutEncryptionRequest *request);
+int send_encryption_request(connection_t *conn, PacketLoginOutEncryptionRequest *request);
 
 #endif

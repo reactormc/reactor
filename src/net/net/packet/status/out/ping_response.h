@@ -13,6 +13,6 @@ PacketStatusOutPingResponse *create_ping_response(uint64_t response);
 
 ReactorPacketPtr pack_ping_response(PacketStatusOutPingResponse *response);
 
-int send_ping_response(ConnectionPtr connection, PacketStatusOutPingResponse *response);
+int send_ping_response(connection_t *conn, PacketStatusOutPingResponse *response);
 
 #endif

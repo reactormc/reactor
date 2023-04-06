@@ -61,13 +61,13 @@ ReactorPacketPtr pack_disconnect(PacketLoginOutDisconnect *disconnect) {
     return packet;
 }
 
-int send_disconnect(ConnectionPtr connection, PacketLoginOutDisconnect *disconnect) {
+int send_disconnect(connection_t *conn, PacketLoginOutDisconnect *disconnect) {
     ReactorPacketPtr packed = pack_disconnect(disconnect);
     if (!packed) {
         return -1;
     }
 
-    send_packet(connection, packed);
+    send_packet(conn, packed);
 
     return 0;
 }

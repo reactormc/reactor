@@ -14,6 +14,6 @@ typedef struct packet_handshaking_in_handshake {
 
 PacketHandshakingInHandshake *read_handshake(ReactorPacketPtr parent, byte_buffer_ptr buffer);
 
-void handle_handshake(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
+void handle_handshake(connection_t *conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
 
 #endif

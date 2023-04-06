@@ -12,6 +12,6 @@ PacketLoginOutDisconnect *create_disconnect(char *reason);
 
 ReactorPacketPtr pack_disconnect(PacketLoginOutDisconnect *disconnect);
 
-int send_disconnect(ConnectionPtr connection, PacketLoginOutDisconnect *disconnect);
+int send_disconnect(connection_t *conn, PacketLoginOutDisconnect *disconnect);
 
 #endif

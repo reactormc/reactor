@@ -7,8 +7,8 @@
 #include "net/packet/play/packet_play_handler.h"
 #include "net/connection.h"
 
-void handle_packet(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
+void handle_packet(connection_t *conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
 
-int send_packet(ConnectionPtr conn, ReactorPacketPtr packet);
+int send_packet(connection_t *conn, ReactorPacketPtr packet);
 
 #endif

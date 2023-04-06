@@ -29,13 +29,13 @@ ReactorPacketPtr pack_status_response(PacketStatusOutStatusResponse *response) {
     return packet;
 }
 
-int send_status_response(ConnectionPtr connection, PacketStatusOutStatusResponse *response) {
+int send_status_response(connection_t *conn, PacketStatusOutStatusResponse *response) {
     ReactorPacketPtr packed = pack_status_response(response);
     if (!packed) {
         return -1;
     }
 
-    send_packet(connection, packed);
+    send_packet(conn, packed);
 
     return 0;
 }

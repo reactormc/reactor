@@ -107,5 +107,7 @@ _deps
 # External projects
 *-prefix/
 
+build/
+
 # End of https://www.toptal.com/developers/gitignore/api/clion+all,cmake
 

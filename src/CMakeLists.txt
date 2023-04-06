@@ -1,38 +1,11 @@
-# Get libunistring
-find_library(UNISTRING_LIB unistring)
-if (NOT UNISTRING_LIB)
-    message(FATAL_ERROR "libunistring not found")
-endif()
-
-# Get json-c
-find_library(JSONC_LIB json-c)
-if (NOT JSONC_LIB)
-    message(FATAL_ERROR "json-c not found")
-endif()
-
-# Get zlib
-find_package(ZLIB)
-if (NOT ZLIB_FOUND)
-    message(FATAL_ERROR "zlib not found")
-endif()
-
-# Get libtomcrypt
-find_library(TOMCRYPT_LIB tomcrypt)
-if (NOT TOMCRYPT_LIB)
-    message(FATAL_ERROR "libtomcrypt not found")
-endif()
-
-# Get libtommath
-find_library(TOMMATH_LIB tommath)
-if (NOT TOMMATH_LIB)
-    message(FATAL_ERROR "libtommath not found")
-endif()
-
-# Get libcurl
-find_package(CURL)
-if (NOT CURL_FOUND)
-    message(FATAL_ERROR "libcurl not found")
-endif()
+find_library(UNISTRING_LIB unistring REQUIRED)
+find_library(JSONC_LIB json-c REQUIRED)
+find_library(TOMCRYPT_LIB tomcrypt REQUIRED)
+find_library(TOMMATH_LIB tommath REQUIRED)
+find_package(ZLIB REQUIRED)
+find_package(CURL REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(pkgconfig_deps REQUIRED IMPORTED_TARGET glib-2.0)
 
 # All sources
 file(GLOB_RECURSE SOURCES LIST_DIRECTORIES false ./*.c ./*.h)
@@ -40,8 +13,8 @@ file(GLOB_RECURSE SOURCES LIST_DIRECTORIES false ./*.c ./*.h)
 # Set libraries
 set(REACTOR_MODULES REACTOR_NET REACTOR_UTIL REACTOR_WORLD)
 set(REACTOR_LIBS
-        ${REACTOR_MODULES} ${UNISTRING_LIB} ${JSONC_LIB} ZLIB::ZLIB ${TOMCRYPT_LIB} ${TOMMATH_LIB}
-        ${CURL_LIBRARIES})
+        ${REACTOR_MODULES} ${UNISTRING_LIB} ${JSONC_LIB} ${TOMCRYPT_LIB} ${TOMMATH_LIB}
+        ZLIB::ZLIB ${CURL_LIBRARIES} PkgConfig::pkgconfig_deps)
 
 # Release build
 add_executable(reactor ${SOURCES})

@@ -2,10 +2,14 @@
 #define SERVER_H 1
 
 #include <stdint.h>
+#include <pthread.h>
 #include <tommath.h>
 #include <tomcrypt.h>
 
 typedef struct server_t {
+    int socket_fd;
+    uint8_t shutdown;
+
     uint8_t *server_id;
     rsa_key rsa_key;
     uint8_t *public_key_x509;

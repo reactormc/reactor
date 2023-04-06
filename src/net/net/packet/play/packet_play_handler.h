@@ -3,6 +3,6 @@
 
 #include "net/connection.h"
 
-void handle_play(server_t *server, ConnectionPtr conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
+void handle_play(connection_t *conn, ReactorPacketPtr packet, byte_buffer_ptr buffer);
 
 #endif

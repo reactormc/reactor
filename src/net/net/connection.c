@@ -7,7 +7,7 @@
 #include "util/unicode_string.h"
 #include "util/logger.h"
 
-static int set_profile_id(ConnectionPtr self, uint8_t *profile_id) {
+static int set_profile_id(connection_t *self, uint8_t *profile_id) {
     size_t len = u8_strlen(profile_id);
 
     if (!self->profile_id) {
@@ -22,7 +22,7 @@ static int set_profile_id(ConnectionPtr self, uint8_t *profile_id) {
     return 0;
 }
 
-static int set_username(ConnectionPtr self, uint8_t *username) {
+static int set_username(connection_t *self, uint8_t *username) {
     if (!self->username) {
         self->username = calloc(16, sizeof(ucs4_t));
         if (!self->username) {
@@ -34,7 +34,7 @@ static int set_username(ConnectionPtr self, uint8_t *username) {
     return 0;
 }
 
-static int set_unique_id(ConnectionPtr self, uuid_t unique_id) {
+static int set_unique_id(connection_t *self, uuid_t unique_id) {
     self->unique_id = unique_id;
     return 0;
 }
@@ -47,7 +47,7 @@ static int set_unique_id(ConnectionPtr self, uuid_t unique_id) {
  * @return the number of bytes read
  */
 static int poll_network(int remote_fd, byte_buffer_ptr buffer) {
-    char tmp[INITIAL_BYTE_BUFFER_SIZE] = {0};
+    int8_t tmp[INITIAL_BYTE_BUFFER_SIZE] = {0};
 
     int bytes_read;
     if ((bytes_read = (int) recv(remote_fd, tmp, INITIAL_BYTE_BUFFER_SIZE, 0)) == -1) {
@@ -67,18 +67,14 @@ static int poll_network(int remote_fd, byte_buffer_ptr buffer) {
  * 3. read one packet and then some of another
  * @param remote_fd
  */
-void handle_connection(server_t *server, int remote_fd) {
+void *handle_connection(void *arg) {
+    connection_t *conn = (connection_t*) arg;
+
     printf("handle_connection: client connected\n");
 
-    ConnectionPtr conn = calloc(1, sizeof(Connection));
-    if (!conn) {
-        perror("create_connection - calloc");
-        exit(EXIT_FAILURE);
-    }
-
-    conn->remote_fd = remote_fd;
     conn->state = STATE_HANDSHAKING;
     conn->is_encrypted = 0;
+
     conn->set_profile_id = &set_profile_id;
     conn->set_username = &set_username;
     conn->set_unique_id = &set_unique_id;
@@ -92,7 +88,7 @@ void handle_connection(server_t *server, int remote_fd) {
 
     while (1) {
         debug("handle_connection: recv()\n");
-        int bytes_read = poll_network(remote_fd, buffer);
+        int bytes_read = poll_network(conn->remote_fd, buffer);
         if (bytes_read == -1) {
             debug("handle_connection: network read fail\n");
             free_byte_buffer(buffer);
@@ -124,7 +120,7 @@ void handle_connection(server_t *server, int remote_fd) {
                 exit(EXIT_FAILURE);
             case 0:
                 debug("handle_connection: handling packet\n");
-                handle_packet(server, conn, packet, buffer);
+                handle_packet(conn, packet, buffer);
                 free_packet(packet);
                 continue;
             default:
